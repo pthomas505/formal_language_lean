@@ -1,4 +1,4 @@
-import Language.RegExp.Derivative
+import FormalLanguageLean.RegExp.Derivative
 
 
 set_option autoImplicit false

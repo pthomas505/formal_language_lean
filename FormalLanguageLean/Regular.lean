@@ -1,4 +1,4 @@
-import Language.Equiv
+import FormalLanguageLean.Equiv
 
 import Mathlib.Data.Finset.NAry
 

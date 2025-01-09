@@ -1,4 +1,4 @@
-import Language.Concat
+import FormalLanguageLean.Concat
 
 
 set_option autoImplicit false

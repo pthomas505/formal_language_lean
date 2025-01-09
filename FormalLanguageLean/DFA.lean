@@ -1,4 +1,4 @@
-import Language.Regular
+import FormalLanguageLean.Regular
 
 import Mathlib.Data.Finset.Basic
 

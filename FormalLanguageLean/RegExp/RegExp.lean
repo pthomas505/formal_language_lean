@@ -1,4 +1,4 @@
-import Language.Regular
+import FormalLanguageLean.Regular
 
 
 set_option autoImplicit false

@@ -1,4 +1,4 @@
-import Language.RegExp.Similar
+import FormalLanguageLean.RegExp.Similar
 
 
 set_option autoImplicit false

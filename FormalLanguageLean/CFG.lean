@@ -1,8 +1,8 @@
 import Mathlib.Data.Set.Lattice
 import Mathlib.Data.Finset.Basic
 
-import MathlibExtra.List
-import Language.Kleene
+import MathlibExtraLean.List
+import FormalLanguageLean.Kleene
 
 
 set_option autoImplicit false

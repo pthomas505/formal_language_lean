@@ -1,6 +1,6 @@
 import Mathlib.Data.Nat.Lattice
 
-import Language.String
+import FormalLanguageLean.String
 
 
 set_option autoImplicit false
