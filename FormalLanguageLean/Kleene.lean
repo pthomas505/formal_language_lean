@@ -222,7 +222,7 @@ theorem append_kleene_closure_closed
 def kleene_closure_set
   (α : Type)
   (L : Language α) :=
-  { s : Str α | ∃ M : List (Str α), (∀ (r : Str α), r ∈ M → r ∈ L) ∧ s = M.join }
+  { s : Str α | ∃ M : List (Str α), (∀ (r : Str α), r ∈ M → r ∈ L) ∧ s = M.flatten }
 
 
 lemma kleene_closure_set_subset_kleene_closure
@@ -252,7 +252,7 @@ lemma kleene_closure_set_subset_kleene_closure
         simp
         obtain ⟨i, a3⟩ := ih
         apply Exists.intro (i + 1)
-        exact append_mem_exp_right L hd tl.join i a2_left_left a3
+        exact append_mem_exp_right L hd tl.flatten i a2_left_left a3
 
 
 lemma kleene_closure_subset_kleene_closure_set

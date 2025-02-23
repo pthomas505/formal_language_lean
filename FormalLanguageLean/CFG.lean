@@ -147,7 +147,7 @@ lemma symbol_not_ts_iff_is_nts
       simp
 
 
-structure Rule (NTS : Type) (TS : Type) :=
+structure Rule (NTS : Type) (TS : Type) where
   (lhs : NTS)
   (rhs : Str (Symbol NTS TS))
 
@@ -160,7 +160,7 @@ def Rule.isEpsilonRule
   P.rhs = []
 
 
-structure CFG (NTS : Type) (TS : Type) :=
+structure CFG (NTS : Type) (TS : Type) where
   (rule_list : List (Rule NTS TS))
   (start_symbol : NTS)
 

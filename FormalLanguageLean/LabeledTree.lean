@@ -69,4 +69,4 @@ def LabeledTree.frontier
   | mk order label children =>
     if order = 0
     then [label]
-    else (List.ofFn (fun (i : Fin order) => (children i).frontier)).join
+    else (List.ofFn (fun (i : Fin order) => (children i).frontier)).flatten

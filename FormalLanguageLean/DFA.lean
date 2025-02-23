@@ -24,7 +24,7 @@ structure DFA
   [DecidableEq α]
   (σ : Type)
   [DecidableEq σ] :
-  Type :=
+  Type where
   (step : σ → α → σ)
   (starting_state : σ)
   (accepting_state_list : List σ)

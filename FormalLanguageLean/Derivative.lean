@@ -751,7 +751,7 @@ noncomputable def foo'
     have IH (v : List α) (h : v.IsSuffix tl) :=
       have : v.length ≤ tl.length := h.length_le
       foo' L v
-    let l2 := l1.attach.bind fun ⟨v, h⟩ => by
+    let l2 := l1.attach.flatMap fun ⟨v, h⟩ => by
       simp [l1, List.mem_filter] at h
       exact IH v h.1
     (hd :: tl) :: l2
