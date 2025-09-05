@@ -20,7 +20,9 @@ set_option autoImplicit false
 -/
 
 
--- Finite strings.
+/--
+  The type of finite strings over the alphabet `α`.
+-/
 abbrev Str (α : Type) : Type := List α
 
 
@@ -34,8 +36,8 @@ ation, or powers of Σ by
 2. Σ^{n+1} = Σ^{n}Σ = {sa : s ∈ Σ^{n}, a ∈ Σ} n ∈ N
 -/
 
-/-
-  exp α n is the set of all strings of length n.
+/--
+  `exp α n` := The set of all strings of length `n` over the alphabet `α`.
 -/
 inductive exp (α : Type) : ℕ → Set (Str α)
   | zero : exp α 0 []
@@ -57,7 +59,7 @@ example
   by
     induction h1
     case zero =>
-      have s1 : [a] = [] ++ [a] := by rfl
+      have s1 : [a] = [] ++ [a] := rfl
       rw [s1]
       apply exp.succ
       exact exp.zero
@@ -95,8 +97,8 @@ theorem str_append_length_left
   (h1 : ¬ s = []) :
   t.length < (s ++ t).length :=
   by
-    simp
-    simp only [List.length_pos]
+    simp only [List.length_append, Nat.lt_add_left_iff_pos]
+    simp only [List.length_pos_iff]
     exact h1
 
 
@@ -106,8 +108,8 @@ theorem str_append_length_right
   (h1 : ¬ t = []) :
   s.length < (s ++ t).length :=
   by
-    simp
-    simp only [List.length_pos]
+    simp only [List.length_append, Nat.lt_add_right_iff_pos]
+    simp only [List.length_pos_iff]
     exact h1
 
 
@@ -118,11 +120,12 @@ lemma str_reverse_mem_exp_length
   by
     induction s
     case nil =>
-      simp
+      simp only [List.length_nil, List.reverse_nil]
       exact exp.zero
     case cons hd tl ih =>
-      simp
-      exact exp.succ tl.length hd tl.reverse ih
+      simp only [List.length_cons, List.reverse_cons]
+      apply exp.succ
+      exact ih
 
 
 theorem str_mem_exp_length
@@ -131,7 +134,7 @@ theorem str_mem_exp_length
   s ∈ exp α s.length :=
   by
     obtain s1 := str_reverse_mem_exp_length s.reverse
-    simp at s1
+    simp only [List.length_reverse, List.reverse_reverse] at s1
     exact s1
 
 
@@ -144,13 +147,15 @@ theorem str_mem_exp_length_eq
   by
     induction h1
     case zero =>
-      simp
+      simp only [List.length_nil]
     case succ k c t ih_1 ih_2 =>
-      simp
-      exact ih_2
+      simp only [List.length_append, List.length_cons, List.length_nil, Nat.zero_add]
+      rewrite [ih_2]
+      rfl
 
-
--- The set of all strings of length n.
+/--
+  `exp_set α n` := The set of all strings of length `n` over the alphabet `α`.
+-/
 def exp_set
   (α : Type)
   (n : ℕ) :
@@ -165,19 +170,23 @@ theorem exp_eq_exp_set
   by
     simp only [exp_set]
     ext cs
-    simp
+    simp only [Set.mem_setOf_eq]
     constructor
     · intro a1
-      exact str_mem_exp_length_eq cs n a1
+      apply str_mem_exp_length_eq
+      exact a1
     · intro a1
       simp only [← a1]
-      exact str_mem_exp_length cs
+      apply str_mem_exp_length
 
 
 /-
 Definition 5 (Kleene closure). Let Σ be an alphabet, then we denote the set of all finite strings over Σ by Σ∗.
 -/
 
+/--
+  `kleene_closure α` := The set of all finite strings over the alphabet `α`.
+-/
 def kleene_closure
   (α : Type) :
   Set (Str α) :=
@@ -190,9 +199,9 @@ theorem str_mem_kleene_closure
   s ∈ kleene_closure α :=
   by
     simp only [kleene_closure]
-    simp
+    simp only [Set.mem_iUnion]
     apply Exists.intro s.length
-    exact str_mem_exp_length s
+    apply str_mem_exp_length
 
 
 theorem kleene_closure_eq_univ
@@ -201,9 +210,12 @@ theorem kleene_closure_eq_univ
   by
     ext cs
     constructor
-    · simp
-    · simp
-      exact str_mem_kleene_closure cs
+    · simp only [Set.mem_univ]
+      intro a1
+      exact trivial
+    · simp only [Set.mem_univ]
+      intro a1
+      apply str_mem_kleene_closure
 
 
 /-
@@ -220,8 +232,8 @@ example
   by
     simp only [← h1]
     simp only [← h2]
-    simp only [← List.length_append s t]
-    exact str_mem_exp_length (s ++ t)
+    simp only [← List.length_append]
+    apply str_mem_exp_length
 
 
 example
@@ -229,7 +241,7 @@ example
   (s t : Str α) :
   s ++ t ∈ kleene_closure α :=
   by
-    exact str_mem_kleene_closure (s ++ t)
+    apply str_mem_kleene_closure
 
 
 theorem str_append_assoc
@@ -237,12 +249,14 @@ theorem str_append_assoc
   (s t u : Str α) :
   s ++ (t ++ u) = (s ++ t) ++ u :=
   by
-    symm
-    exact List.append_assoc s t u
+    simp only [List.append_assoc]
 
 
 /-
 Definition 7. (Substring) Suppose that s, t, u, v are strings such that s = tuv, then u is called a substring of s. Further, if at least one of t and v is not ε then u is called a proper substring of s.
+-/
+/--
+  `is_substring_of α s u` := True if and only if the string `u` is a substring of the string `s`.
 -/
 def is_substring_of
   (α : Type)
@@ -250,14 +264,22 @@ def is_substring_of
   Prop :=
   ∃ (t v : Str α), s = t ++ u ++ v
 
+
+/--
+  `is_proper_substring_of α s u` := True if and only if the string `u` is a proper substring of the string `s`.
+-/
 def is_proper_substring_of
   (α : Type)
   (s u : Str α) :
   Prop :=
   ∃ (t v : Str α), s = t ++ u ++ v ∧ (¬ t.isEmpty ∨ ¬ v.isEmpty)
 
+
 /-
 Definition 8. (Prefix) Suppose that s, t, u are strings such that s = tu, then t is called a prefix of s. Further, t is called a proper prefix of s if u ≠ ε.
+-/
+/--
+  `is_prefix_of α s t` := True if and only if the string `t` is a prefix of the string `s`.
 -/
 def is_prefix_of
   (α : Type)
@@ -265,14 +287,22 @@ def is_prefix_of
   Prop :=
   ∃ (u : Str α), s = t ++ u
 
+
+/--
+  `is_proper_prefix_of α s t` := True if and only if the string `t` is a proper prefix of the string `s`.
+-/
 def is_proper_prefix_of
   (α : Type)
   (s t : Str α) :
   Prop :=
   ∃ (u : Str α), s = t ++ u ∧ ¬ u.isEmpty
 
+
 /-
 Definition 9. (Suffix) Suppose that s, t, u are strings such that s = tu, then u is called a suffix of s. Further, u is called a proper suffix of s if t ≠ ε.
+-/
+/--
+  `is_suffix_of α s u` := True if and only if the string `u` is a suffix of the string `s`.
 -/
 def is_suffix_of
   (α : Type)
@@ -280,8 +310,15 @@ def is_suffix_of
   Prop :=
   ∃ (t : Str α), s = t ++ u
 
+
+/--
+  `is_proper_suffix_of α s u` := True if and only if the string `u` is a proper suffix of the string `s`.
+-/
 def is_proper_suffix_of
   (α : Type)
   (s u : Str α) :
   Prop :=
   ∃ (t : Str α), s = t ++ u ∧ ¬ t.isEmpty
+
+
+#lint
