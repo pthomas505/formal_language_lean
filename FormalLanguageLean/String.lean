@@ -168,7 +168,7 @@ theorem exp_eq_exp_set
   (n : ℕ) :
   exp α n = exp_set α n :=
   by
-    simp only [exp_set]
+    unfold exp_set
     ext cs
     simp only [Set.mem_setOf_eq]
     constructor
@@ -198,7 +198,7 @@ theorem str_mem_kleene_closure
   (s : Str α) :
   s ∈ kleene_closure α :=
   by
-    simp only [kleene_closure]
+    unfold kleene_closure
     simp only [Set.mem_iUnion]
     apply Exists.intro s.length
     apply str_mem_exp_length
