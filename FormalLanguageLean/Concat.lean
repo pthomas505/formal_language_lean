@@ -13,6 +13,10 @@ set_option autoImplicit false
 Definition 10 (Language). A language L over some alphabet Σ is a subset of Σ∗, i.e. L ⊆ Σ∗.
 -/
 
+/--
+  The type of languages over the alphabet `α`.
+  A language over some alphabet `α` is a subset of the set of all finite strings over the alphabet `α`.
+-/
 abbrev Language (α : Type) : Type := Set (Str α)
 
 
@@ -26,7 +30,7 @@ example
   by
     simp only [Set.subset_def]
     intro cs _
-    exact String.str_mem_kleene_closure cs
+    apply String.str_mem_kleene_closure
 
 
 lemma eps_not_mem_str_length_gt_zero
@@ -37,8 +41,8 @@ lemma eps_not_mem_str_length_gt_zero
   (h2 : s ∈ L) :
   s.length > 0 :=
   by
-    simp
-    simp only [List.length_pos]
+    simp only [gt_iff_lt]
+    simp only [List.length_pos_iff]
     exact ne_of_mem_of_not_mem h2 h1
 
 
@@ -48,13 +52,19 @@ lemma take_append_len_left
   (h1 : s ++ t = cs) :
   List.take (cs.length - t.length) cs = s :=
   by
-    rw [← h1]
-    simp
+    rewrite [← h1]
+    apply List.take_left'
+    simp only [List.length_append]
+    apply Nat.eq_sub_of_add_eq
+    rfl
 
 
 /-
 Definition 11 (Concatenation). Let L1 and L2 be languages. The concatenation of L1 and L2, written L1 · L2, or L1L2 is defined by
 L1L2 = {s · t = st : s ∈ L1, t ∈ L2} .
+-/
+/--
+  `concat L1 L2` := The concatenation of the languages `L1` and `L2`.
 -/
 def concat
   {α : Type}

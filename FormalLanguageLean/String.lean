@@ -60,12 +60,12 @@ example
     induction h1
     case zero =>
       have s1 : [a] = [] ++ [a] := rfl
-      rw [s1]
+      rewrite [s1]
       apply exp.succ
       exact exp.zero
     case succ n' a' s' _ ih_2 =>
       have s1 : a :: (s' ++ [a']) = (a :: s') ++ [a'] := rfl
-      rw [s1]
+      rewrite [s1]
       apply exp.succ
       exact ih_2
 
@@ -97,8 +97,7 @@ theorem str_append_length_left
   (h1 : ¬ s = []) :
   t.length < (s ++ t).length :=
   by
-    simp only [List.length_append, Nat.lt_add_left_iff_pos]
-    simp only [List.length_pos_iff]
+    rewrite [List.length_append, Nat.lt_add_left_iff_pos, List.length_pos_iff]
     exact h1
 
 
@@ -108,8 +107,7 @@ theorem str_append_length_right
   (h1 : ¬ t = []) :
   s.length < (s ++ t).length :=
   by
-    simp only [List.length_append, Nat.lt_add_right_iff_pos]
-    simp only [List.length_pos_iff]
+    rewrite [List.length_append, Nat.lt_add_right_iff_pos, List.length_pos_iff]
     exact h1
 
 
@@ -120,10 +118,10 @@ lemma str_reverse_mem_exp_length
   by
     induction s
     case nil =>
-      simp only [List.length_nil, List.reverse_nil]
+      rewrite [List.length_nil, List.reverse_nil]
       exact exp.zero
     case cons hd tl ih =>
-      simp only [List.length_cons, List.reverse_cons]
+      rewrite [List.length_cons, List.reverse_cons]
       apply exp.succ
       exact ih
 
@@ -134,7 +132,7 @@ theorem str_mem_exp_length
   s ∈ exp α s.length :=
   by
     obtain s1 := str_reverse_mem_exp_length s.reverse
-    simp only [List.length_reverse, List.reverse_reverse] at s1
+    rewrite [List.length_reverse, List.reverse_reverse] at s1
     exact s1
 
 
@@ -147,9 +145,10 @@ theorem str_mem_exp_length_eq
   by
     induction h1
     case zero =>
-      simp only [List.length_nil]
+      rewrite [List.length_nil]
+      rfl
     case succ k c t ih_1 ih_2 =>
-      simp only [List.length_append, List.length_cons, List.length_nil, Nat.zero_add]
+      rewrite [List.length_append, List.length_cons, List.length_nil, Nat.zero_add]
       rewrite [ih_2]
       rfl
 
@@ -170,13 +169,13 @@ theorem exp_eq_exp_set
   by
     unfold exp_set
     ext cs
-    simp only [Set.mem_setOf_eq]
+    rewrite [Set.mem_setOf_eq]
     constructor
     · intro a1
       apply str_mem_exp_length_eq
       exact a1
     · intro a1
-      simp only [← a1]
+      rewrite [← a1]
       apply str_mem_exp_length
 
 
@@ -199,7 +198,7 @@ theorem str_mem_kleene_closure
   s ∈ kleene_closure α :=
   by
     unfold kleene_closure
-    simp only [Set.mem_iUnion]
+    rewrite [Set.mem_iUnion]
     apply Exists.intro s.length
     apply str_mem_exp_length
 
@@ -210,11 +209,9 @@ theorem kleene_closure_eq_univ
   by
     ext cs
     constructor
-    · simp only [Set.mem_univ]
-      intro a1
-      exact trivial
-    · simp only [Set.mem_univ]
-      intro a1
+    · intro a1
+      apply Set.mem_univ
+    · intro a1
       apply str_mem_kleene_closure
 
 
@@ -230,9 +227,9 @@ example
   (h2 : t.length = n) :
   s ++ t ∈ exp α (m + n) :=
   by
-    simp only [← h1]
-    simp only [← h2]
-    simp only [← List.length_append]
+    rewrite [← h1]
+    rewrite [← h2]
+    rewrite [← List.length_append]
     apply str_mem_exp_length
 
 
@@ -249,7 +246,8 @@ theorem str_append_assoc
   (s t u : Str α) :
   s ++ (t ++ u) = (s ++ t) ++ u :=
   by
-    simp only [List.append_assoc]
+    rewrite [List.append_assoc]
+    rfl
 
 
 /-
