@@ -97,11 +97,11 @@ lemma concat_eq_concat_list
     constructor
     · intro a1
       obtain ⟨s, hs, t, ht, eq⟩ := a1
-      rw [← eq]
+      rewrite [← eq]
       exact ⟨s, t, ⟨hs, ht⟩, rfl⟩
     · intro a1
       obtain ⟨s, t, ⟨hs, ht⟩, eq⟩ := a1
-      rw [← eq]
+      rewrite [← eq]
       exact ⟨s, hs, t, ht, rfl⟩
 
 
