@@ -370,7 +370,6 @@ theorem concat_distrib_s_union_right
 
 lemma concat_distrib_countable_union_left
   {α : Type}
-  [DecidableEq α]
   (L : Language α)
   (f : ℕ → Language α) :
   ⋃ (n : ℕ), concat L (f n) = concat L (⋃ (n : ℕ), (f n)) :=
@@ -391,7 +390,6 @@ lemma concat_distrib_countable_union_left
 
 lemma concat_distrib_countable_union_right
   {α : Type}
-  [DecidableEq α]
   (L : Language α)
   (f : ℕ → Language α) :
   ⋃ (n : ℕ), concat (f n) L = concat (⋃ (n : ℕ), (f n)) L :=
@@ -412,7 +410,6 @@ lemma concat_distrib_countable_union_right
 
 lemma concat_distrib_finset_i_union_left
   {α : Type}
-  [DecidableEq α]
   {β : Type}
   (L : Language α)
   (S : Finset β)
@@ -435,7 +432,6 @@ lemma concat_distrib_finset_i_union_left
 
 lemma concat_distrib_finset_i_union_right
   {α : Type}
-  [DecidableEq α]
   {β : Type}
   (M : Language α)
   (S : Finset β)
@@ -583,7 +579,6 @@ lemma concat_subset_right
 
 theorem intersection_concat_char_and_concat_diff_char_eq_empty
   {α : Type}
-  [DecidableEq α]
   (L : Language α)
   (a b : α)
   (h1 : ¬ b = a) :
@@ -774,3 +769,6 @@ lemma right_nonempty_subset_concat_eps_mem_left
     apply Nat.not_le_of_lt lt
     apply le
     exact ht
+
+
+#lint
