@@ -538,6 +538,7 @@ theorem concat_distrib_union_right
 
 -------------------------------------------------------------------------------
 
+
 lemma concat_subset
   {α : Type}
   (L1 L2 M1 M2 : Language α)
@@ -545,13 +546,11 @@ lemma concat_subset
   (h2 : L2 ⊆ M2) :
   concat L1 L2 ⊆ concat M1 M2 :=
   by
-    simp only [Set.subset_def]
+    unfold concat
+    rewrite [Set.subset_def]
+    simp only [Set.mem_setOf_eq]
     intro x a1
-    simp only [concat] at a1
-    simp at a1
     obtain ⟨s, hs, t, ht, eq⟩ := a1
-    simp only [concat]
-    simp
     have s1 : s ∈ M1 := h1 hs
     have s2 : t ∈ M2 := h2 ht
     exact ⟨s, s1, t, s2, eq⟩
@@ -578,7 +577,9 @@ lemma concat_subset_right
     · exact h1
     · rfl
 
+
 -------------------------------------------------------------------------------
+
 
 theorem intersection_concat_char_and_concat_diff_char_eq_empty
   {α : Type}
