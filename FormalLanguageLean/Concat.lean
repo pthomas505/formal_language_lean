@@ -126,8 +126,8 @@ lemma concat_empty_left
   (L : Language α) :
   concat ∅ L = ∅ :=
   by
-    unfold concat
     ext cs
+    unfold concat
     rewrite [Set.mem_setOf_eq]
     constructor
     · intro a1
@@ -144,8 +144,8 @@ lemma concat_empty_right
   (L : Language α) :
   concat L ∅ = ∅ :=
   by
-    simp only [concat]
     ext cs
+    unfold concat
     rewrite [Set.mem_setOf_eq]
     constructor
     · intro a1
@@ -375,17 +375,17 @@ lemma concat_distrib_countable_union_left
   (f : ℕ → Language α) :
   ⋃ (n : ℕ), concat L (f n) = concat L (⋃ (n : ℕ), (f n)) :=
   by
-    simp only [concat]
     ext cs
-    simp
+    unfold concat
+    simp only [Set.mem_iUnion, Set.mem_setOf_eq]
     constructor
     · intro a1
       obtain ⟨i, s, hs, t, ⟨ht, eq⟩⟩ := a1
-      rw [← eq]
+      rewrite [← eq]
       exact ⟨s, hs, t, ⟨i, ht⟩, rfl⟩
     · intro a1
       obtain ⟨s, hs, t, ⟨i, ht⟩, eq⟩ := a1
-      rw [← eq]
+      rewrite [← eq]
       exact ⟨i, s, hs, t, ht, rfl⟩
 
 
@@ -592,21 +592,22 @@ theorem intersection_concat_char_and_concat_diff_char_eq_empty
     ext cs
     unfold concat
     simp only [Set.mem_singleton_iff]
-    simp only [Set.mem_inter_iff]
+    rewrite [Set.mem_inter_iff]
     simp only [Set.mem_setOf_eq]
     constructor
     · intro a1
       obtain ⟨⟨s1, h_s1, t1, h_t1, eq_1⟩, ⟨s2, h_s2, t2, h_t2, eq_2⟩⟩ := a1
       rewrite [h_s1] at eq_1
-      simp only [List.cons_append, List.nil_append] at eq_1
+      rewrite [List.cons_append, List.nil_append] at eq_1
       rewrite [h_s2] at eq_2
-      simp only [List.cons_append, List.nil_append] at eq_2
+      rewrite [List.cons_append, List.nil_append] at eq_2
       rewrite [← eq_1] at eq_2
-      simp only [List.cons.injEq] at eq_2
+      rewrite [List.cons.injEq] at eq_2
       obtain ⟨eq_2_left, eq_2_right⟩ := eq_2
       contradiction
     · intro a1
-      simp only [Set.mem_empty_iff_false] at a1
+      rewrite [Set.mem_empty_iff_false] at a1
+      contradiction
 
 
 -------------------------------------------------------------------------------
@@ -621,7 +622,9 @@ lemma exists_mem_concat_str_length_gt_mem_left
   (h3 : [] ∉ M) :
   ∃ (t : Str α), t ∈ concat L M ∧ s.length < t.length :=
   by
+    unfold Set.Nonempty at h2
     obtain ⟨t, ht⟩ := h2
+
     apply Exists.intro (s ++ t)
     constructor
     · apply append_mem_concat
@@ -643,7 +646,9 @@ lemma exists_mem_concat_str_length_gt_mem_right
   (h3 : [] ∉ L) :
   ∃ (s : Str α), s ∈ concat L M ∧ t.length < s.length :=
   by
+    unfold Set.Nonempty at h2
     obtain ⟨s, hs⟩ := h2
+
     apply Exists.intro (s ++ t)
     constructor
     · apply append_mem_concat
@@ -664,16 +669,17 @@ lemma exists_mem_left_str_length_lt_concat
   (h2 : [] ∉ M) :
   ∃ (t : Str α), t ∈ L ∧ t.length < s.length :=
   by
-    simp only [concat] at h1
-    simp at h1
+    unfold concat at h1
+    rewrite [Set.mem_setOf_eq] at h1
     obtain ⟨u, hu, v, hv, eq⟩ := h1
-    rw [← eq]
+
+    rewrite [← eq]
     apply Exists.intro u
     constructor
     · exact hu
-    · simp
-      simp only [List.length_pos]
-      exact ne_of_mem_of_not_mem hv h2
+    · simp only [List.length_append, Nat.lt_add_right_iff_pos]
+      simp only [List.length_pos_iff]
+      apply ne_of_mem_of_not_mem hv h2
 
 
 lemma exists_mem_right_str_length_lt_concat
@@ -687,12 +693,13 @@ lemma exists_mem_right_str_length_lt_concat
     simp only [concat] at h1
     simp at h1
     obtain ⟨u, hu, v, hv, eq⟩ := h1
-    rw [← eq]
+
+    rewrite [← eq]
     apply Exists.intro v
     constructor
     · exact hv
-    · simp
-      simp only [List.length_pos]
+    · simp only [List.length_append, Nat.lt_add_left_iff_pos]
+      simp only [List.length_pos_iff]
       exact ne_of_mem_of_not_mem hu h2
 
 
