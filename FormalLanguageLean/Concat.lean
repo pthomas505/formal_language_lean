@@ -711,21 +711,25 @@ lemma set_list_inf_length_exists
     ∀ (ys : List α), ys ∈ S → xs.length <= ys.length :=
   by
     let length_set : Set ℕ := Set.image List.length S
-    let length_set_inf := sInf length_set
-    have s1 : length_set.Nonempty := Set.Nonempty.image List.length h1
-    have s2 : length_set_inf ∈ length_set := Nat.sInf_mem s1
-    have s3 : ∃ (list_set_inf : List α), list_set_inf ∈ S ∧ list_set_inf.length = length_set_inf :=
+    let length_set_inf : ℕ := sInf length_set
+
+    have s1 : ∃ (list_set_inf : List α), list_set_inf ∈ S ∧ list_set_inf.length = length_set_inf :=
     by
-      rw [← Set.mem_image List.length S length_set_inf]
-      exact s2
-    obtain ⟨list_set_inf, list_set_inf_mem, list_set_inf_length⟩ := s3
+      rewrite [← Set.mem_image]
+      apply Nat.sInf_mem
+      apply Set.Nonempty.image
+      exact h1
+
+    obtain ⟨list_set_inf, list_set_inf_mem, list_set_inf_length⟩ := s1
+
     apply Exists.intro list_set_inf
     constructor
     · exact list_set_inf_mem
     · intro ys hy
-      rw [list_set_inf_length]
-      have s4 : ys.length ∈ length_set := Set.mem_image_of_mem List.length hy
-      exact Nat.sInf_le s4
+      rewrite [list_set_inf_length]
+      apply Nat.sInf_le
+      apply Set.mem_image_of_mem
+      exact hy
 
 
 lemma left_nonempty_subset_concat_eps_mem_right
@@ -737,14 +741,17 @@ lemma left_nonempty_subset_concat_eps_mem_right
   by
     obtain s1 := set_list_inf_length_exists L h1
     obtain ⟨min, mem, le⟩ := s1
-    simp only [Set.subset_def] at h2
+
+    rewrite [Set.subset_def] at h2
     specialize h2 min mem
+
     by_contra contra
     obtain s2 := exists_mem_left_str_length_lt_concat L M min h2 contra
     obtain ⟨t, ht, lt⟩ := s2
-    specialize le t ht
-    have s3 : ¬ min.length ≤ t.length := Nat.not_le_of_lt lt
-    contradiction
+
+    apply Nat.not_le_of_lt lt
+    apply le
+    exact ht
 
 
 lemma right_nonempty_subset_concat_eps_mem_left
@@ -756,11 +763,14 @@ lemma right_nonempty_subset_concat_eps_mem_left
   by
     obtain s1 := set_list_inf_length_exists M h1
     obtain ⟨min, mem, le⟩ := s1
-    simp only [Set.subset_def] at h2
+
+    rewrite [Set.subset_def] at h2
     specialize h2 min mem
+
     by_contra contra
     obtain s2 := exists_mem_right_str_length_lt_concat L M min h2 contra
     obtain ⟨t, ht, lt⟩ := s2
-    specialize le t ht
-    have s3 : ¬ min.length ≤ t.length := Nat.not_le_of_lt lt
-    contradiction
+
+    apply Nat.not_le_of_lt lt
+    apply le
+    exact ht
