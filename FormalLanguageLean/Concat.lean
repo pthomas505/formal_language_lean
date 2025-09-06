@@ -505,9 +505,36 @@ theorem concat_distrib_union_right
   concat (L1 ∪ L2) L3 =
     concat L1 L3 ∪ concat L2 L3 :=
   by
-    obtain s1 := concat_distrib_s_union_right {L1, L2} L3
-    simp at s1
-    exact s1
+    ext cs
+    unfold concat
+    simp only [Set.mem_union, Set.mem_setOf_eq]
+    constructor
+    · intro a1
+      obtain ⟨s, hs, t, ht, eq⟩ := a1
+      cases hs
+      case inl hs =>
+        left
+        exact ⟨s, hs, t, ht, eq⟩
+      case inr hs =>
+        right
+        exact ⟨s, hs, t, ht, eq⟩
+    · intro a1
+      cases a1
+      case inl a1 =>
+        obtain ⟨s, hs, t, ht, eq⟩ := a1
+        apply Exists.intro s
+        constructor
+        · left
+          exact hs
+        · exact ⟨t, ht, eq⟩
+      case inr a1 =>
+        obtain ⟨s, hs, t, ht, eq⟩ := a1
+        apply Exists.intro s
+        constructor
+        · right
+          exact hs
+        · exact ⟨t, ht, eq⟩
+
 
 -------------------------------------------------------------------------------
 
