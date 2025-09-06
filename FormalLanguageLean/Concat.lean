@@ -611,6 +611,7 @@ theorem intersection_concat_char_and_concat_diff_char_eq_empty
 
 -------------------------------------------------------------------------------
 
+
 lemma exists_mem_concat_str_length_gt_mem_left
   {α : Type}
   (L M : Language α)
@@ -623,9 +624,14 @@ lemma exists_mem_concat_str_length_gt_mem_left
     obtain ⟨t, a1⟩ := h2
     apply Exists.intro (s ++ t)
     constructor
-    · apply append_mem_concat L M s t h1 a1
-    · have s1 : ¬ t = [] := ne_of_mem_of_not_mem a1 h3
-      exact String.str_append_length_right s t s1
+    · apply append_mem_concat
+      · exact h1
+      · exact a1
+    · apply String.str_append_length_right
+      intro contra
+      apply h3
+      rewrite [← contra]
+      exact a1
 
 
 lemma exists_mem_concat_str_length_gt_mem_right
