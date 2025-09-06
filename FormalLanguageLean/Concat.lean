@@ -590,13 +590,24 @@ theorem intersection_concat_char_and_concat_diff_char_eq_empty
   concat {[a]} L ∩ concat {[b]} L = ∅ :=
   by
     ext cs
-    simp only [concat]
-    simp
-    intro s _ a2 t _
-    simp only [← a2]
-    simp
-    intro a4
-    contradiction
+    unfold concat
+    simp only [Set.mem_singleton_iff]
+    simp only [Set.mem_inter_iff]
+    simp only [Set.mem_setOf_eq]
+    constructor
+    · intro a1
+      obtain ⟨⟨s1, h_s1, t1, h_t1, eq_1⟩, ⟨s2, h_s2, t2, h_t2, eq_2⟩⟩ := a1
+      rewrite [h_s1] at eq_1
+      simp only [List.cons_append, List.nil_append] at eq_1
+      rewrite [h_s2] at eq_2
+      simp only [List.cons_append, List.nil_append] at eq_2
+      rewrite [← eq_1] at eq_2
+      simp only [List.cons.injEq] at eq_2
+      obtain ⟨eq_2_left, eq_2_right⟩ := eq_2
+      contradiction
+    · intro a1
+      simp only [Set.mem_empty_iff_false] at a1
+
 
 -------------------------------------------------------------------------------
 
