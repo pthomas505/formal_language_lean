@@ -621,17 +621,17 @@ lemma exists_mem_concat_str_length_gt_mem_left
   (h3 : [] ∉ M) :
   ∃ (t : Str α), t ∈ concat L M ∧ s.length < t.length :=
   by
-    obtain ⟨t, a1⟩ := h2
+    obtain ⟨t, ht⟩ := h2
     apply Exists.intro (s ++ t)
     constructor
     · apply append_mem_concat
       · exact h1
-      · exact a1
+      · exact ht
     · apply String.str_append_length_right
       intro contra
       apply h3
       rewrite [← contra]
-      exact a1
+      exact ht
 
 
 lemma exists_mem_concat_str_length_gt_mem_right
