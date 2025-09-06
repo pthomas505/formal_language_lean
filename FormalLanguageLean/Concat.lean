@@ -396,17 +396,17 @@ lemma concat_distrib_countable_union_right
   (f : ℕ → Language α) :
   ⋃ (n : ℕ), concat (f n) L = concat (⋃ (n : ℕ), (f n)) L :=
   by
-    simp only [concat]
     ext cs
-    simp
+    unfold concat
+    simp only [Set.mem_iUnion, Set.mem_setOf_eq]
     constructor
     · intro a1
       obtain ⟨i, s, hs, t, ⟨ht, eq⟩⟩ := a1
-      rw [← eq]
+      rewrite [← eq]
       exact ⟨s, ⟨i, hs⟩, t, ht, rfl⟩
     · intro a1
       obtain ⟨s, ⟨i, hs⟩, t, ht, eq⟩ := a1
-      rw [← eq]
+      rewrite [← eq]
       exact ⟨i, s, hs, t, ht, rfl⟩
 
 
