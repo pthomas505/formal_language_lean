@@ -28,7 +28,7 @@ example
   (L : Language α) :
   L ⊆ String.kleene_closure α :=
   by
-    simp only [Set.subset_def]
+    rewrite [Set.subset_def]
     intro cs _
     apply String.str_mem_kleene_closure
 
@@ -41,8 +41,8 @@ lemma eps_not_mem_str_length_gt_zero
   (h2 : s ∈ L) :
   s.length > 0 :=
   by
-    simp only [gt_iff_lt]
-    simp only [List.length_pos_iff]
+    rewrite [gt_iff_lt]
+    rewrite [List.length_pos_iff]
     exact ne_of_mem_of_not_mem h2 h1
 
 
@@ -54,7 +54,7 @@ lemma take_append_len_left
   by
     rewrite [← h1]
     apply List.take_left'
-    simp only [List.length_append]
+    rewrite [List.length_append]
     apply Nat.eq_sub_of_add_eq
     rfl
 
@@ -73,23 +73,27 @@ def concat
   { s ++ t | (s ∈ L1) (t ∈ L2) }
 
 
+/--
+  `concat L1 L2` := The concatenation of the lists of strings `L1` and `L2` defined such that `concat L1.toFinset.toSet L2.toFinset.toSet = (concat_list L1 L2).toFinset.toSet`.
+-/
 def concat_list
   {α : Type}
-  (L1 L2 : List (List α)) :
-  List (List α) :=
+  (L1 L2 : List (Str α)) :
+  List (Str α) :=
   (List.product L1 L2).map (fun (s, t) => s ++ t)
 
 
 lemma concat_eq_concat_list
   {α : Type}
   [DecidableEq α]
-  (L1 L2 : List (List α)) :
-  concat L1.toFinset.toSet L2.toFinset.toSet = (concat_list L1 L2).toFinset.toSet :=
+  (L1 L2 : List (Str α)) :
+  concat L1.toFinset.toSet L2.toFinset.toSet =
+    (concat_list L1 L2).toFinset.toSet :=
   by
     ext cs
-    simp only [concat]
+    unfold concat
     simp only [concat_list]
-    simp
+    simp only [List.coe_toFinset, Set.mem_setOf_eq, List.mem_map, Prod.exists, List.pair_mem_product]
     constructor
     · intro a1
       obtain ⟨s, hs, t, ht, eq⟩ := a1
@@ -109,19 +113,30 @@ lemma append_mem_concat
   (h2 : t ∈ M) :
   s ++ t ∈ concat L M :=
   by
-    simp only [concat]
-    simp
+    unfold concat
+    rewrite [Set.mem_setOf_eq]
     exact ⟨s, h1, t, h2, rfl⟩
 
+
 -------------------------------------------------------------------------------
+
 
 lemma concat_empty_left
   {α : Type}
   (L : Language α) :
   concat ∅ L = ∅ :=
   by
-    simp only [concat]
-    simp
+    unfold concat
+    ext cs
+    rewrite [Set.mem_setOf_eq]
+    constructor
+    · intro a1
+      obtain ⟨s, hs, t, ht, eq⟩ := a1
+      rewrite [Set.mem_empty_iff_false] at hs
+      contradiction
+    · intro a1
+      rewrite [Set.mem_empty_iff_false] at a1
+      contradiction
 
 
 lemma concat_empty_right
@@ -130,9 +145,20 @@ lemma concat_empty_right
   concat L ∅ = ∅ :=
   by
     simp only [concat]
-    simp
+    ext cs
+    rewrite [Set.mem_setOf_eq]
+    constructor
+    · intro a1
+      obtain ⟨s, hs, t, ht, eq⟩ := a1
+      rewrite [Set.mem_empty_iff_false] at ht
+      contradiction
+    · intro a1
+      rewrite [Set.mem_empty_iff_false] at a1
+      contradiction
+
 
 -------------------------------------------------------------------------------
+
 
 lemma concat_nonempty_iff
   {α : Type}
@@ -140,11 +166,11 @@ lemma concat_nonempty_iff
   (concat L M).Nonempty ↔ L.Nonempty ∧ M.Nonempty :=
   by
     simp only [Set.Nonempty]
-    simp only [concat]
-    simp
+    unfold concat
+    simp only [Set.mem_setOf_eq]
     constructor
     · intro a1
-      obtain ⟨x, s, hs, t, ht, _⟩ := a1
+      obtain ⟨x, s, hs, t, ht, eq⟩ := a1
       exact ⟨⟨s, hs⟩, ⟨t, ht⟩⟩
     · intro a1
       obtain ⟨⟨s, hs⟩, ⟨t, ht⟩⟩ := a1
@@ -157,19 +183,20 @@ lemma concat_empty_iff
   (concat L M) = ∅ ↔ L = ∅ ∨ M = ∅ :=
   by
     simp only [← Set.not_nonempty_iff_eq_empty]
-    rw [← not_and_or]
-    apply not_congr
-    exact concat_nonempty_iff L M
+    rewrite [concat_nonempty_iff]
+    apply not_and_or
+
 
 -------------------------------------------------------------------------------
+
 
 lemma concat_eps_left
   {α : Type}
   (L : Language α) :
   concat {[]} L = L :=
   by
-    simp only [concat]
-    simp
+    unfold concat
+    simp only [Set.mem_singleton_iff, exists_eq_left, List.nil_append, exists_eq_right, Set.setOf_mem_eq]
 
 
 lemma concat_eps_right
@@ -177,18 +204,31 @@ lemma concat_eps_right
   (L : Language α) :
   concat L {[]} = L :=
   by
-    simp only [concat]
-    simp
+    unfold concat
+    simp only [Set.mem_singleton_iff, exists_eq_left, List.append_nil, exists_eq_right, Set.setOf_mem_eq]
+
 
 -------------------------------------------------------------------------------
+
 
 lemma eps_mem_concat_iff
   {α : Type}
   (L M : Language α) :
   [] ∈ concat L M ↔ [] ∈ L ∧ [] ∈ M :=
   by
-    simp only [concat]
-    simp
+    unfold concat
+    simp only [Set.mem_setOf_eq, List.append_eq_nil_iff]
+    constructor
+    · intro a1
+      obtain ⟨s, hs, t, ht, s_eq, t_eq⟩ := a1
+      constructor
+      · rewrite [← s_eq]
+        exact hs
+      · rewrite [← t_eq]
+        exact ht
+    · intro a1
+      obtain ⟨a1_left, a1_right⟩ := a1
+      exact ⟨[], a1_left, [], a1_right, rfl, rfl⟩
 
 
 lemma eps_not_mem_concat_iff
@@ -196,9 +236,8 @@ lemma eps_not_mem_concat_iff
   (L M : Language α) :
   [] ∉ concat L M ↔ ([] ∉ L ∨ [] ∉ M) :=
   by
-    rw [← not_and_or]
-    apply not_congr
-    exact eps_mem_concat_iff L M
+    rewrite [eps_mem_concat_iff]
+    apply not_and_or
 
 
 example
@@ -209,10 +248,14 @@ example
   (h2 : s ∈ concat L M) :
   s.length > 0 :=
   by
-    rw [← eps_not_mem_concat_iff] at h1
-    exact eps_not_mem_str_length_gt_zero (concat L M) s h1 h2
+    rewrite [← eps_not_mem_concat_iff] at h1
+    apply eps_not_mem_str_length_gt_zero (concat L M)
+    · exact h1
+    · exact h2
+
 
 -------------------------------------------------------------------------------
+
 
 lemma append_mem_concat_eps_left
   {α : Type}
@@ -222,9 +265,11 @@ lemma append_mem_concat_eps_left
   (h2 : x ∈ M) :
   x ∈ concat L M :=
   by
-    have s1 : x = [] ++ x := by rfl
-    rw [s1]
-    exact append_mem_concat L M [] x h1 h2
+    have s1 : x = [] ++ x := rfl
+    rewrite [s1]
+    apply append_mem_concat
+    · exact h1
+    · exact h2
 
 
 lemma eps_mem_left_right_subset_concat
@@ -233,9 +278,11 @@ lemma eps_mem_left_right_subset_concat
   (h1 : [] ∈ L) :
   M ⊆ concat L M :=
   by
-    simp only [Set.subset_def]
+    rewrite [Set.subset_def]
     intro x a1
-    exact append_mem_concat_eps_left L M x h1 a1
+    apply append_mem_concat_eps_left
+    · exact h1
+    · exact a1
 
 
 lemma append_mem_concat_eps_right
@@ -246,9 +293,11 @@ lemma append_mem_concat_eps_right
   (h2 : [] ∈ M) :
   x ∈ concat L M :=
   by
-    have s1 : x = x ++ [] := by rw [List.append_nil];
-    rw [s1]
-    exact append_mem_concat L M x [] h1 h2
+    have s1 : x = x ++ [] := by rewrite [List.append_nil]; rfl
+    rewrite [s1]
+    apply append_mem_concat
+    · exact h1
+    · exact h2
 
 
 lemma eps_mem_right_left_subset_concat
@@ -257,9 +306,12 @@ lemma eps_mem_right_left_subset_concat
   (h1 : [] ∈ M) :
   L ⊆ concat L M :=
   by
-    simp only [Set.subset_def]
+    rewrite [Set.subset_def]
     intro x a1
-    exact append_mem_concat_eps_right L M x a1 h1
+    apply append_mem_concat_eps_right
+    · exact a1
+    · exact h1
+
 
 -------------------------------------------------------------------------------
 
