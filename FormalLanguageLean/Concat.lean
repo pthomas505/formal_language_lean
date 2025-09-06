@@ -315,16 +315,22 @@ lemma eps_mem_right_left_subset_concat
 
 -------------------------------------------------------------------------------
 
+
 theorem concat_assoc
   {α : Type}
   (L1 L2 L3 : Language α) :
   concat L1 (concat L2 L3) =
     concat (concat L1 L2) L3 :=
   by
-    simp only [concat]
-    simp
+    ext cs
+    unfold concat
+    simp only [Set.mem_setOf_eq]
+    simp only [exists_exists_and_exists_and_eq_and]
+    simp only [List.append_assoc]
+
 
 -------------------------------------------------------------------------------
+
 
 theorem concat_distrib_s_union_left
   {α : Type}
@@ -332,18 +338,15 @@ theorem concat_distrib_s_union_left
   (S : Set (Language α)) :
   concat L (⋃₀ S) = ⋃ (s ∈ S), (concat L s) :=
   by
-    simp only [concat]
     ext cs
+    unfold concat
+    simp only [Set.mem_sUnion, Set.mem_setOf_eq, Set.mem_iUnion]
     constructor
     · intro a1
-      simp at a1
       obtain ⟨s, hs, t, ⟨M, hM, ht⟩, eq⟩ := a1
-      simp
       exact ⟨M, hM, s, hs, t, ht, eq⟩
     · intro a1
-      simp at a1
       obtain ⟨M, hM, s, hs, t, ht, eq⟩ := a1
-      simp
       exact ⟨s, hs, t, ⟨M, hM, ht⟩, eq⟩
 
 
@@ -353,18 +356,15 @@ theorem concat_distrib_s_union_right
   (L : Language α) :
   concat (⋃₀ S) L = ⋃ (s ∈ S), (concat s L) :=
   by
-    simp only [concat]
     ext cs
+    unfold concat
+    simp only [Set.mem_sUnion, Set.mem_setOf_eq, Set.mem_iUnion]
     constructor
     · intro a1
-      simp at a1
       obtain ⟨s, ⟨M, hM, hs⟩, t, ht, eq⟩ := a1
-      simp
       exact ⟨M, hM, s, hs, t, ht, eq⟩
     · intro a1
-      simp at a1
       obtain ⟨M, hM, s, hs, t, ht, eq⟩ := a1
-      simp
       exact ⟨s, ⟨M, hM, hs⟩, t, ht, eq⟩
 
 
