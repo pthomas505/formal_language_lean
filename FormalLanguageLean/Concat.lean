@@ -165,8 +165,8 @@ lemma concat_nonempty_iff
   (L M : Language α) :
   (concat L M).Nonempty ↔ L.Nonempty ∧ M.Nonempty :=
   by
-    simp only [Set.Nonempty]
     unfold concat
+    simp only [Set.Nonempty]
     simp only [Set.mem_setOf_eq]
     constructor
     · intro a1
@@ -685,8 +685,8 @@ lemma exists_mem_right_str_length_lt_concat
   (h2 : [] ∉ L) :
   ∃ (t : Str α), t ∈ M ∧ t.length < s.length :=
   by
-    simp only [concat] at h1
-    simp at h1
+    unfold concat at h1
+    rewrite [Set.mem_setOf_eq] at h1
     obtain ⟨u, hu, v, hv, eq⟩ := h1
 
     rewrite [← eq]
