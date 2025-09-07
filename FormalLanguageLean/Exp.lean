@@ -134,6 +134,7 @@ lemma exp_succ_concat_right
 
 -------------------------------------------------------------------------------
 
+
 example
   {α : Type}
   (n : ℕ)
@@ -144,10 +145,12 @@ example
     case zero =>
       contradiction
     case succ k =>
-      simp only [exp]
-      simp only [concat_empty_right]
+      unfold exp
+      apply concat_empty_right
+
 
 -------------------------------------------------------------------------------
+
 
 lemma nonempty_exp_nonempty
   {α : Type}
