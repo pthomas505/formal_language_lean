@@ -44,20 +44,20 @@ def exp_list
 lemma exp_eq_exp_list
   {α : Type}
   [DecidableEq α]
-  (L : List (List α))
+  (L : List (Str α))
   (n : ℕ) :
   exp L.toFinset.toSet n = (exp_list L n).toFinset.toSet :=
   by
     induction n
     case zero =>
-      simp only [exp]
-      simp only [exp_list]
-      simp
+      unfold exp
+      unfold exp_list
+      simp only [List.toFinset_cons, List.toFinset_nil, insert_empty_eq, Finset.coe_singleton]
     case succ k ih =>
-      simp only [exp]
-      simp only [exp_list]
-      rw [ih]
-      exact concat_eq_concat_list (exp_list L k) L
+      unfold exp
+      unfold exp_list
+      rewrite [ih]
+      apply concat_eq_concat_list
 
 
 def exp_list_finite_union
