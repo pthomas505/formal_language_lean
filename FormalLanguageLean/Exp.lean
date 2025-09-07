@@ -82,26 +82,31 @@ example
 example
   {α : Type}
   [DecidableEq α]
-  (L : List (List α))
+  (L : List (Str α))
   (n : ℕ) :
   ⋃ (k ≤ n), exp L.toFinset.toSet k = (exp_list_finite_union L n).toFinset.toSet :=
   by
+    simp only [List.coe_toFinset]
     induction n
     case zero =>
-      simp
-      simp only [exp]
-      simp only [exp_list_finite_union]
-      simp only [exp_list]
-      simp
+      unfold exp_list_finite_union
+      simp only [Nat.le_zero_eq]
+      simp only [Set.iUnion_iUnion_eq_left]
+
+      obtain s1 := exp_eq_exp_list L 0
+      simp only [List.coe_toFinset] at s1
+
+      exact s1
     case succ k ih =>
-      simp at ih
-      simp only [exp_list_finite_union]
-      simp
+      unfold exp_list_finite_union
+      simp only [Set.biUnion_le_succ]
+      rewrite [ih]
+      simp only [List.mem_append]
+
       obtain s1 := exp_eq_exp_list L (k + 1)
-      simp at s1
-      rw [← s1]
-      rw [← ih]
-      exact Set.biUnion_le_succ (fun k => exp {a | a ∈ L} k) k
+      simp only [List.coe_toFinset] at s1
+      rewrite [s1]
+      rfl
 
 
 lemma exp_zero
