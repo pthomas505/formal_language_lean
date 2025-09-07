@@ -60,14 +60,23 @@ lemma exp_eq_exp_list
       apply concat_eq_concat_list
 
 
+/--
+  `exp_list_finite_union L n` := L^0 ++ ... ++ L^n.
+-/
 def exp_list_finite_union
   {α : Type}
-  (L : List (List α))
+  (L : List (Str α))
   (n : ℕ) :
-  List (List α) :=
+  List (Str α) :=
   match n with
   | 0 => exp_list L 0
-  | (k + 1) => exp_list_finite_union L k ++ exp_list L (k + 1)
+  | k + 1 => exp_list_finite_union L k ++ exp_list L (k + 1)
+
+
+example
+  {α : Type}
+  (L : List (Str α)) :
+  exp_list_finite_union L 1 = exp_list L 0 ++ exp_list L 1 := rfl
 
 
 example
