@@ -674,7 +674,7 @@ lemma exists_mem_left_str_length_lt_concat
     · exact hu
     · simp only [List.length_append, Nat.lt_add_right_iff_pos]
       simp only [List.length_pos_iff]
-      apply ne_of_mem_of_not_mem hv h2
+      exact ne_of_mem_of_not_mem hv h2
 
 
 lemma exists_mem_right_str_length_lt_concat
