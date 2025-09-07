@@ -112,9 +112,7 @@ example
 lemma exp_zero
   {α : Type}
   (L : Language α) :
-  exp L 0 = {[]} :=
-  by
-    rfl
+  exp L 0 = {[]} := rfl
 
 
 lemma exp_one
@@ -124,16 +122,15 @@ lemma exp_one
   by
     simp only [exp]
     simp only [concat]
-    simp
+    simp only [Set.mem_singleton_iff, exists_eq_left, List.nil_append, exists_eq_right, Set.setOf_mem_eq]
 
 
 lemma exp_succ_concat_right
   {α : Type}
   (L : Language α)
   (n : ℕ) :
-  exp L (n + 1) = concat (exp L n) L :=
-  by
-    rfl
+  exp L (n + 1) = concat (exp L n) L := rfl
+
 
 -------------------------------------------------------------------------------
 
