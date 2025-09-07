@@ -15,6 +15,9 @@ Definition 12 (Exponentiation). Let L be a language. The exponentiation or power
 1. L^0 = {ε}
 2. L^(n+1) = L^(n)L n ∈ N
 -/
+/--
+  `exp L n` := The language `L` to the power `n`.
+-/
 def exp
   {α : Type}
   (L : Language α)
@@ -25,11 +28,14 @@ def exp
   | n + 1 => concat (exp L n) L
 
 
+/--
+  `exp_list L n` := The list of strings `L` to the power `n` defined such that `exp L.toFinset.toSet n = (exp_list L n).toFinset.toSet`.
+-/
 def exp_list
   {α : Type}
-  (L : List (List α))
+  (L : List (Str α))
   (n : ℕ) :
-  List (List α) :=
+  List (Str α) :=
   match n with
   | 0 => [[]]
   | n + 1 => concat_list (exp_list L n) L
