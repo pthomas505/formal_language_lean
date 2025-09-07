@@ -164,7 +164,7 @@ lemma nonempty_exp_nonempty
       simp only [Set.Nonempty]
       simp only [exp]
       apply Exists.intro []
-      simp
+      simp only [Set.mem_singleton_iff]
     case succ k ih =>
       simp only [exp]
       simp only [concat_nonempty_iff]
