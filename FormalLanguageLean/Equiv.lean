@@ -38,7 +38,7 @@ def L_equiv
   {u | s ++ u ∈ L} = {u | t ++ u ∈ L}
 
 
-lemma L_equiv_iff_deriv_eq
+theorem L_equiv_iff_deriv_eq
   {α : Type}
   (L : Language α)
   (s t : Str α) :

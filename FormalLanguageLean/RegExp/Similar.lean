@@ -122,7 +122,7 @@ def simp_union
     | S => RegExp.union R S
 
 
-lemma simp_union_lang_eq_union_lang
+theorem simp_union_lang_eq_union_lang
   {α : Type}
   (RE_1 RE_2 : RegExp α) :
   (simp_union RE_1 RE_2).LanguageOf = (RegExp.union RE_1 RE_2).LanguageOf :=
@@ -156,7 +156,7 @@ def simp_concat
     | S => RegExp.concat R S
 
 
-lemma simp_concat_lang_eq_concat_lang
+theorem simp_concat_lang_eq_concat_lang
   {α : Type}
   (RE_1 RE_2 : RegExp α) :
   (simp_concat RE_1 RE_2).LanguageOf = (RegExp.concat RE_1 RE_2).LanguageOf :=
@@ -193,7 +193,7 @@ def simp_kleene_closure
   | R => RegExp.kleene_closure R
 
 
-lemma simp_kleene_closure_lang_eq_kleene_closure_lang
+theorem simp_kleene_closure_lang_eq_kleene_closure_lang
   {α : Type}
   (RE : RegExp α) :
   (simp_kleene_closure RE).LanguageOf = (RegExp.kleene_closure RE).LanguageOf :=
@@ -231,7 +231,7 @@ def simp_derivative
   | kleene_closure R => simp_concat (R.simp_derivative a) (simp_kleene_closure R)
 
 
-lemma simp_derivative_lang_eq_derivative_lang
+theorem simp_derivative_lang_eq_derivative_lang
   {α : Type}
   [DecidableEq α]
   (RE : RegExp α)

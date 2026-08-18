@@ -40,7 +40,7 @@ def derivative_of_finset_wrt_char
   Finset.biUnion Γ (fun (R : RegExp α) => {RegExp.derivative R a})
 
 
-lemma regexp_lang_derivative_of_finset_wrt_char_eq_regexp_derivative_of_finset_wrt_char_lang
+theorem regexp_lang_derivative_of_finset_wrt_char_eq_regexp_derivative_of_finset_wrt_char_lang
   {α : Type}
   [DecidableEq α]
   (Γ : Finset (RegExp α))
@@ -63,7 +63,7 @@ def derivative_of_finset_wrt_str
   Finset.biUnion Γ (fun (R : RegExp α) => {RegExp.derivative_wrt_str R s})
 
 
-lemma regexp_lang_derivative_of_finset_wrt_str_eq_regexp_derivative_of_finset_wrt_str_lang
+theorem regexp_lang_derivative_of_finset_wrt_str_eq_regexp_derivative_of_finset_wrt_str_lang
   {α : Type}
   [DecidableEq α]
   (Γ : Finset (RegExp α))
@@ -143,7 +143,7 @@ def partial_derivative_of_finset_wrt_str
   RegExp.partial_derivative_of_finset_wrt_str_aux Γ s
 
 
-lemma partial_derivative_wrt_str_aux_last
+theorem partial_derivative_wrt_str_aux_last
   {α : Type}
   [DecidableEq α]
   (Γ : Finset (RegExp α))
@@ -162,7 +162,7 @@ lemma partial_derivative_wrt_str_aux_last
       exact ih (RegExp.partial_derivative_of_finset_wrt_char Γ hd)
 
 
-lemma partial_derivative_wrt_str_last
+theorem partial_derivative_wrt_str_last
   {α : Type}
   [DecidableEq α]
   (RE : RegExp α)

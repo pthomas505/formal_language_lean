@@ -1,9 +1,11 @@
-import Mathlib.Data.Nat.Lattice
+import Mathlib.Order.Lattice.Nat
 
 import FormalLanguageLean.String
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -33,7 +35,7 @@ example
     apply String.str_mem_kleene_closure
 
 
-lemma eps_not_mem_str_length_gt_zero
+theorem eps_not_mem_str_length_gt_zero
   {α : Type}
   (L : Language α)
   (s : Str α)
@@ -41,22 +43,19 @@ lemma eps_not_mem_str_length_gt_zero
   (h2 : s ∈ L) :
   s.length > 0 :=
   by
-    rewrite [gt_iff_lt]
+    simp only [gt_iff_lt]
     rewrite [List.length_pos_iff]
     exact ne_of_mem_of_not_mem h2 h1
 
 
-lemma take_append_len_left
+theorem take_append_len_left
   {α : Type}
   (cs s t : Str α)
   (h1 : s ++ t = cs) :
   List.take (cs.length - t.length) cs = s :=
   by
     rewrite [← h1]
-    apply List.take_left'
-    rewrite [List.length_append]
-    apply Nat.eq_sub_of_add_eq
-    rfl
+    simp only [List.length_append, Nat.add_sub_cancel, List.take_left']
 
 
 /-
@@ -83,16 +82,16 @@ def concat_list
   (List.product L1 L2).map (fun (s, t) => s ++ t)
 
 
-lemma concat_eq_concat_list
+theorem concat_eq_concat_list
   {α : Type}
   [DecidableEq α]
   (L1 L2 : List (Str α)) :
-  concat L1.toFinset.toSet L2.toFinset.toSet =
-    (concat_list L1 L2).toFinset.toSet :=
+  concat (L1.toFinset : Set (Str α)) (L2.toFinset : Set (Str α)) =
+    ((concat_list L1 L2).toFinset : Set (Str α)) :=
   by
     ext cs
     unfold concat
-    simp only [concat_list]
+    rewrite [concat_list]
     simp only [List.coe_toFinset, Set.mem_setOf_eq, List.mem_map, Prod.exists, List.pair_mem_product]
     constructor
     · intro a1
@@ -105,7 +104,7 @@ lemma concat_eq_concat_list
       exact ⟨s, hs, t, ht, rfl⟩
 
 
-lemma append_mem_concat
+theorem append_mem_concat
   {α : Type}
   (L M : Language α)
   (s t : Str α)
@@ -121,7 +120,7 @@ lemma append_mem_concat
 -------------------------------------------------------------------------------
 
 
-lemma concat_empty_left
+theorem concat_empty_left
   {α : Type}
   (L : Language α) :
   concat ∅ L = ∅ :=
@@ -139,7 +138,7 @@ lemma concat_empty_left
       contradiction
 
 
-lemma concat_empty_right
+theorem concat_empty_right
   {α : Type}
   (L : Language α) :
   concat L ∅ = ∅ :=
@@ -160,13 +159,13 @@ lemma concat_empty_right
 -------------------------------------------------------------------------------
 
 
-lemma concat_nonempty_iff
+theorem concat_nonempty_iff
   {α : Type}
   (L M : Language α) :
   (concat L M).Nonempty ↔ L.Nonempty ∧ M.Nonempty :=
   by
     unfold concat
-    simp only [Set.Nonempty]
+    unfold Set.Nonempty
     simp only [Set.mem_setOf_eq]
     constructor
     · intro a1
@@ -177,7 +176,7 @@ lemma concat_nonempty_iff
       exact ⟨s ++ t, s, hs, t, ht, rfl⟩
 
 
-lemma concat_empty_iff
+theorem concat_empty_iff
   {α : Type}
   (L M : Language α) :
   (concat L M) = ∅ ↔ L = ∅ ∨ M = ∅ :=
@@ -190,7 +189,7 @@ lemma concat_empty_iff
 -------------------------------------------------------------------------------
 
 
-lemma concat_eps_left
+theorem concat_eps_left
   {α : Type}
   (L : Language α) :
   concat {[]} L = L :=
@@ -199,7 +198,7 @@ lemma concat_eps_left
     simp only [Set.mem_singleton_iff, exists_eq_left, List.nil_append, exists_eq_right, Set.setOf_mem_eq]
 
 
-lemma concat_eps_right
+theorem concat_eps_right
   {α : Type}
   (L : Language α) :
   concat L {[]} = L :=
@@ -211,7 +210,7 @@ lemma concat_eps_right
 -------------------------------------------------------------------------------
 
 
-lemma eps_mem_concat_iff
+theorem eps_mem_concat_iff
   {α : Type}
   (L M : Language α) :
   [] ∈ concat L M ↔ [] ∈ L ∧ [] ∈ M :=
@@ -231,7 +230,7 @@ lemma eps_mem_concat_iff
       exact ⟨[], a1_left, [], a1_right, rfl, rfl⟩
 
 
-lemma eps_not_mem_concat_iff
+theorem eps_not_mem_concat_iff
   {α : Type}
   (L M : Language α) :
   [] ∉ concat L M ↔ ([] ∉ L ∨ [] ∉ M) :=
@@ -257,7 +256,7 @@ example
 -------------------------------------------------------------------------------
 
 
-lemma append_mem_concat_eps_left
+theorem append_mem_concat_eps_left
   {α : Type}
   (L M : Language α)
   (x : Str α)
@@ -265,14 +264,14 @@ lemma append_mem_concat_eps_left
   (h2 : x ∈ M) :
   x ∈ concat L M :=
   by
-    have s1 : x = [] ++ x := rfl
+    have s1 : x = [] ++ x := by apply Eq.refl
     rewrite [s1]
     apply append_mem_concat
     · exact h1
     · exact h2
 
 
-lemma eps_mem_left_right_subset_concat
+theorem eps_mem_left_right_subset_concat
   {α : Type}
   (L M : Language α)
   (h1 : [] ∈ L) :
@@ -285,7 +284,7 @@ lemma eps_mem_left_right_subset_concat
     · exact a1
 
 
-lemma append_mem_concat_eps_right
+theorem append_mem_concat_eps_right
   {α : Type}
   (L M : Language α)
   (x : Str α)
@@ -293,14 +292,18 @@ lemma append_mem_concat_eps_right
   (h2 : [] ∈ M) :
   x ∈ concat L M :=
   by
-    have s1 : x = x ++ [] := by rewrite [List.append_nil]; rfl
+    have s1 : x = x ++ [] :=
+    by
+      rewrite [List.append_nil]
+      apply Eq.refl
+
     rewrite [s1]
     apply append_mem_concat
     · exact h1
     · exact h2
 
 
-lemma eps_mem_right_left_subset_concat
+theorem eps_mem_right_left_subset_concat
   {α : Type}
   (L M : Language α)
   (h1 : [] ∈ M) :
@@ -368,7 +371,7 @@ theorem concat_distrib_s_union_right
       exact ⟨s, ⟨M, hM, hs⟩, t, ht, eq⟩
 
 
-lemma concat_distrib_countable_union_left
+theorem concat_distrib_countable_union_left
   {α : Type}
   (L : Language α)
   (f : ℕ → Language α) :
@@ -388,7 +391,7 @@ lemma concat_distrib_countable_union_left
       exact ⟨i, s, hs, t, ht, rfl⟩
 
 
-lemma concat_distrib_countable_union_right
+theorem concat_distrib_countable_union_right
   {α : Type}
   (L : Language α)
   (f : ℕ → Language α) :
@@ -408,7 +411,7 @@ lemma concat_distrib_countable_union_right
       exact ⟨i, s, hs, t, ht, rfl⟩
 
 
-lemma concat_distrib_finset_i_union_left
+theorem concat_distrib_finset_i_union_left
   {α : Type}
   {β : Type}
   (L : Language α)
@@ -430,7 +433,7 @@ lemma concat_distrib_finset_i_union_left
       exact ⟨i, hi, s, hs, t, ht, rfl⟩
 
 
-lemma concat_distrib_finset_i_union_right
+theorem concat_distrib_finset_i_union_right
   {α : Type}
   {β : Type}
   (M : Language α)
@@ -535,7 +538,7 @@ theorem concat_distrib_union_right
 -------------------------------------------------------------------------------
 
 
-lemma concat_subset
+theorem concat_subset
   {α : Type}
   (L1 L2 M1 M2 : Language α)
   (h1 : L1 ⊆ M1)
@@ -552,18 +555,18 @@ lemma concat_subset
     exact ⟨s, s1, t, s2, eq⟩
 
 
-lemma concat_subset_left
+theorem concat_subset_left
   {α : Type}
   (L1 L2 L3 : Language α)
   (h1 : L2 ⊆ L3) :
   concat L1 L2 ⊆ concat L1 L3 :=
   by
     apply concat_subset
-    · rfl
+    · apply Set.Subset.refl
     · exact h1
 
 
-lemma concat_subset_right
+theorem concat_subset_right
   {α : Type}
   (L1 L2 L3 : Language α)
   (h1 : L2 ⊆ L3) :
@@ -571,7 +574,7 @@ lemma concat_subset_right
   by
     apply concat_subset
     · exact h1
-    · rfl
+    · apply Set.Subset.refl
 
 
 -------------------------------------------------------------------------------
@@ -608,7 +611,7 @@ theorem intersection_concat_char_and_concat_diff_char_eq_empty
 -------------------------------------------------------------------------------
 
 
-lemma exists_mem_concat_str_length_gt_mem_left
+theorem exists_mem_concat_str_length_gt_mem_left
   {α : Type}
   (L M : Language α)
   (s : Str α)
@@ -632,7 +635,7 @@ lemma exists_mem_concat_str_length_gt_mem_left
       exact ht
 
 
-lemma exists_mem_concat_str_length_gt_mem_right
+theorem exists_mem_concat_str_length_gt_mem_right
   {α : Type}
   (L M : Language α)
   (t : Str α)
@@ -656,7 +659,7 @@ lemma exists_mem_concat_str_length_gt_mem_right
       exact hs
 
 
-lemma exists_mem_left_str_length_lt_concat
+theorem exists_mem_left_str_length_lt_concat
   {α : Type}
   (L M : Language α)
   (s : Str α)
@@ -677,7 +680,7 @@ lemma exists_mem_left_str_length_lt_concat
       exact ne_of_mem_of_not_mem hv h2
 
 
-lemma exists_mem_right_str_length_lt_concat
+theorem exists_mem_right_str_length_lt_concat
   {α : Type}
   (L M : Language α)
   (s : Str α)
@@ -698,7 +701,7 @@ lemma exists_mem_right_str_length_lt_concat
       exact ne_of_mem_of_not_mem hu h2
 
 
-lemma set_list_inf_length_exists
+theorem set_list_inf_length_exists
   {α : Type}
   (S : Set (List α))
   (h1 : S.Nonempty) :
@@ -727,7 +730,7 @@ lemma set_list_inf_length_exists
       exact hy
 
 
-lemma left_nonempty_subset_concat_eps_mem_right
+theorem left_nonempty_subset_concat_eps_mem_right
   {α : Type}
   (L M : Language α)
   (h1 : L.Nonempty)
@@ -749,7 +752,7 @@ lemma left_nonempty_subset_concat_eps_mem_right
     exact ht
 
 
-lemma right_nonempty_subset_concat_eps_mem_left
+theorem right_nonempty_subset_concat_eps_mem_left
   {α : Type}
   (L M : Language α)
   (h1 : M.Nonempty)
@@ -771,4 +774,4 @@ lemma right_nonempty_subset_concat_eps_mem_left
     exact ht
 
 
-#lint
+end Language

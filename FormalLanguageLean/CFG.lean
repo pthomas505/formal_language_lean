@@ -76,7 +76,7 @@ def Symbol.getNTS
   | nts a, _ => a
 
 
-lemma symbol_is_nts_imp_exists_nts
+theorem symbol_is_nts_imp_exists_nts
   {NTS : Type}
   {TS : Type}
   (c : Symbol NTS TS)
@@ -98,7 +98,7 @@ def Symbol.getTS
   | ts a, _ => a
 
 
-lemma symbol_is_ts_imp_exists_ts
+theorem symbol_is_ts_imp_exists_ts
   {NTS : Type}
   {TS : Type}
   (c : Symbol NTS TS)
@@ -113,7 +113,7 @@ lemma symbol_is_ts_imp_exists_ts
       rfl
 
 
-lemma symbol_not_nts_iff_is_ts
+theorem symbol_not_nts_iff_is_ts
   {NTS : Type}
   {TS : Type}
   (c : Symbol NTS TS) :
@@ -130,7 +130,7 @@ lemma symbol_not_nts_iff_is_ts
       simp
 
 
-lemma symbol_not_ts_iff_is_nts
+theorem symbol_not_ts_iff_is_nts
   {NTS : Type}
   {TS : Type}
   (c : Symbol NTS TS) :
@@ -274,7 +274,7 @@ def CFG.RightLanguageOf
   { s : Str TS | Relation.ReflTransGen (is_rightmost_derivation_step G) [Symbol.nts G.start_symbol] (s.map Symbol.ts) }
 
 
-lemma is_derivation_step_same_append_left
+theorem is_derivation_step_same_append_left
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -298,7 +298,7 @@ lemma is_derivation_step_same_append_left
       · simp
 
 
-lemma is_derivation_step_same_append_right
+theorem is_derivation_step_same_append_right
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -322,7 +322,7 @@ lemma is_derivation_step_same_append_right
       · simp
 
 
-lemma rtc_is_derivation_step_same_append_left
+theorem rtc_is_derivation_step_same_append_left
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -340,7 +340,7 @@ lemma rtc_is_derivation_step_same_append_left
       · exact ih_3
 
 
-lemma rtc_is_derivation_step_same_append_right
+theorem rtc_is_derivation_step_same_append_right
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -358,7 +358,7 @@ lemma rtc_is_derivation_step_same_append_right
       · exact ih_3
 
 
-lemma derives_append
+theorem derives_append
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -377,7 +377,7 @@ lemma derives_append
     exact Relation.ReflTransGen.trans s1 s2
 
 
-lemma res1
+theorem res1
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -394,7 +394,7 @@ lemma res1
     exact h1
 
 
-lemma res2
+theorem res2
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -408,7 +408,7 @@ lemma res2
     exact Relation.ReflTransGen.refl
 
 
-lemma res3
+theorem res3
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -421,7 +421,7 @@ lemma res3
     exact h2
 
 
-lemma slres
+theorem slres
   {NTS : Type}
   {TS : Type}
   (lhs s : NTS)
@@ -437,7 +437,7 @@ lemma slres
       simp at h1
 
 
-lemma slres2
+theorem slres2
   {NTS : Type}
   {TS : Type}
   (lhs s : NTS)
@@ -454,7 +454,7 @@ lemma slres2
       simp at h1
 
 
-lemma rgr_r8
+theorem rgr_r8
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -471,7 +471,7 @@ lemma rgr_r8
     exact h2
 
 
-lemma upgr_r11
+theorem upgr_r11
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -486,7 +486,7 @@ lemma upgr_r11
 
 -------------------------------------------------------------------------------
 
-lemma leftmost_derivation_step_is_derivation_step
+theorem leftmost_derivation_step_is_derivation_step
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -500,7 +500,7 @@ lemma leftmost_derivation_step_is_derivation_step
     exact ⟨R, sl_1, sl_2, a2, a3⟩
 
 
-lemma rightmost_derivation_step_is_derivation_step
+theorem rightmost_derivation_step_is_derivation_step
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -514,7 +514,7 @@ lemma rightmost_derivation_step_is_derivation_step
     exact ⟨R, sl_1, sl_2, a2, a3⟩
 
 
-lemma derivation_step_to_terminal_string_is_leftmost_derivation_step
+theorem derivation_step_to_terminal_string_is_leftmost_derivation_step
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -537,7 +537,7 @@ lemma derivation_step_to_terminal_string_is_leftmost_derivation_step
     exact ⟨R, sl_1, sl_2, s1, a1, a2, a3⟩
 
 
-lemma derivation_step_to_terminal_string_is_rightmost_derivation_step
+theorem derivation_step_to_terminal_string_is_rightmost_derivation_step
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -561,7 +561,7 @@ lemma derivation_step_to_terminal_string_is_rightmost_derivation_step
     exact ⟨R, sl_1, sl_2, s1, a1, a2, a3⟩
 
 
-lemma exists_nts_imp_exists_leftmost_nts
+theorem exists_nts_imp_exists_leftmost_nts
   {NTS : Type}
   {TS : Type}
   (sl : Str (Symbol NTS TS))
@@ -587,7 +587,7 @@ lemma exists_nts_imp_exists_leftmost_nts
       exact a1
 
 
-lemma exists_nts_imp_exists_rightmost_nts
+theorem exists_nts_imp_exists_rightmost_nts
   {NTS : Type}
   {TS : Type}
   (sl : Str (Symbol NTS TS))
@@ -613,7 +613,7 @@ lemma exists_nts_imp_exists_rightmost_nts
       exact a1
 
 
-lemma is_derivation_step_and_is_not_leftmost_derivation_step_aux
+theorem is_derivation_step_and_is_not_leftmost_derivation_step_aux
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
@@ -647,7 +647,7 @@ lemma is_derivation_step_and_is_not_leftmost_derivation_step_aux
     · exact ⟨ih_1, ih_2, ih_3⟩
 
 
-lemma is_derivation_step_and_is_not_leftmost_derivation_step
+theorem is_derivation_step_and_is_not_leftmost_derivation_step
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)

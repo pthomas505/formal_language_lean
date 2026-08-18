@@ -35,7 +35,7 @@ def derivative_wrt_str
   | hd :: tl => RegExp.derivative_wrt_str (RegExp.derivative RE hd) tl
 
 
-lemma regexp_lang_derivative_eq_regexp_derivative_lang
+theorem regexp_lang_derivative_eq_regexp_derivative_lang
   {α : Type}
   [DecidableEq α]
   (RE : RegExp α)
@@ -76,7 +76,7 @@ lemma regexp_lang_derivative_eq_regexp_derivative_lang
       simp only [Language.derivative_of_kleene_closure_wrt_char]
 
 
-lemma regexp_lang_derivative_wrt_str_eq_regexp_derivative_lang
+theorem regexp_lang_derivative_wrt_str_eq_regexp_derivative_lang
   {α : Type}
   [DecidableEq α]
   (RE : RegExp α)

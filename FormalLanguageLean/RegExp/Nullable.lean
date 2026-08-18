@@ -34,7 +34,7 @@ instance
       infer_instance
 
 
-lemma regexp_is_nullable_iff_eps_mem_lang_of
+theorem regexp_is_nullable_iff_eps_mem_lang_of
   {α : Type}
   (RE : RegExp α) :
   RE.is_nullable ↔ [] ∈ RE.LanguageOf :=
@@ -62,7 +62,7 @@ lemma regexp_is_nullable_iff_eps_mem_lang_of
       simp only [Language.eps_mem_kleene_closure]
 
 
-lemma regexp_is_nullable_iff_regexp_lang_of_is_nullable
+theorem regexp_is_nullable_iff_regexp_lang_of_is_nullable
   {α : Type}
   (RE : RegExp α) :
   RE.is_nullable ↔ RE.LanguageOf.is_nullable :=
@@ -82,7 +82,7 @@ def nullify
   | kleene_closure _ => epsilon
 
 
-lemma regexp_nullify_lang_eq_regexp_lang_nullify
+theorem regexp_nullify_lang_eq_regexp_lang_nullify
   {α : Type}
   [DecidableEq α]
   (RE : RegExp α) :

@@ -2,7 +2,9 @@ import Mathlib.Data.Set.Lattice
 import Mathlib.Data.Finset.Basic
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -59,12 +61,12 @@ example
   by
     induction h1
     case zero =>
-      have s1 : [a] = [] ++ [a] := rfl
+      have s1 : [a] = [] ++ [a] := by apply Eq.refl
       rewrite [s1]
       apply exp.succ
       exact exp.zero
     case succ n' a' s' _ ih_2 =>
-      have s1 : a :: (s' ++ [a']) = (a :: s') ++ [a'] := rfl
+      have s1 : a :: (s' ++ [a']) = (a :: s') ++ [a'] := by apply Eq.refl
       rewrite [s1]
       apply exp.succ
       exact ih_2
@@ -111,7 +113,7 @@ theorem str_append_length_right
     exact h1
 
 
-lemma str_reverse_mem_exp_length
+theorem str_reverse_mem_exp_length
   {α : Type}
   (s : Str α) :
   s.reverse ∈ exp α s.length :=
@@ -146,11 +148,11 @@ theorem str_mem_exp_length_eq
     induction h1
     case zero =>
       rewrite [List.length_nil]
-      rfl
+      apply Eq.refl
     case succ k c t ih_1 ih_2 =>
       rewrite [List.length_append, List.length_cons, List.length_nil, Nat.zero_add]
       rewrite [ih_2]
-      rfl
+      apply Eq.refl
 
 /--
   `exp_set α n` := The set of all strings of length `n` over the alphabet `α`.
@@ -247,7 +249,7 @@ theorem str_append_assoc
   s ++ (t ++ u) = (s ++ t) ++ u :=
   by
     rewrite [List.append_assoc]
-    rfl
+    apply Eq.refl
 
 
 /-
@@ -319,4 +321,4 @@ def is_proper_suffix_of
   ∃ (t : Str α), s = t ++ u ∧ ¬ t.isEmpty
 
 
-#lint
+end String
