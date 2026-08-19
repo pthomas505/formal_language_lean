@@ -774,95 +774,91 @@ theorem derivative_of_exp_succ_wrt_char
 
 theorem derivative_distrib_union_of_countable_wrt_char
   {α : Type}
-  [DecidableEq α]
   (a : α)
   (f : ℕ → Language α) :
   ⋃ n, derivative (f n) [a] = derivative (⋃ n, f n) [a] :=
   by
-    simp only [derivative]
+    unfold derivative
     ext cs
-    simp
+    simp only [List.cons_append, List.nil_append, Set.mem_iUnion, Set.mem_setOf_eq]
 
 
 theorem derivative_distrib_union_of_countable_wrt_str
   {α : Type}
-  [DecidableEq α]
   (s : Str α)
   (f : ℕ → Language α) :
   ⋃ n, derivative (f n) s = derivative (⋃ n, f n) s :=
   by
-    simp only [derivative]
+    unfold derivative
     ext cs
-    simp
+    simp only [Set.mem_iUnion, Set.mem_setOf_eq]
 
 
 theorem derivative_distrib_union_of_finset_wrt_char
   {α : Type}
-  [DecidableEq α]
   {β : Type}
   (a : α)
   (Γ : Finset β)
-  (f : β → Language α):
+  (f : β → Language α) :
   ⋃ (x ∈ Γ), derivative (f x) [a] = derivative (⋃ (x ∈ Γ), f x) [a] :=
   by
-    simp only [derivative]
+    unfold derivative
     ext cs
-    simp
+    simp only [List.cons_append, List.nil_append, Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
 
 
 theorem derivative_distrib_union_of_finset_wrt_str
   {α : Type}
-  [DecidableEq α]
   {β : Type}
   (s : Str α)
   (Γ : Finset β)
-  (f : β → Language α):
+  (f : β → Language α) :
   ⋃ (x ∈ Γ), derivative (f x) s = derivative (⋃ (x ∈ Γ), f x) s :=
   by
-    simp only [derivative]
+    unfold derivative
     ext cs
-    simp
+    simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
 
 
 -- 1.57
 theorem derivative_of_kleene_closure_wrt_char
   {α : Type}
-  [DecidableEq α]
   (L : Language α)
   (a : α) :
   derivative (kleene_closure α L) [a] = concat (derivative L [a]) (kleene_closure α L) :=
   by
-    conv => left; simp only [kleene_closure_eq_union_exp]
-    simp only [← Set.union_iUnion_nat_succ (exp L)]
-    simp only [derivative_of_union_wrt_char]
-    simp only [exp_zero]
-    simp only [derivative_of_eps_wrt_char]
+    conv => left; rewrite [kleene_closure_eq_union_exp]
+    rewrite [← Set.union_iUnion_nat_succ (exp L)]
+    rewrite [derivative_of_union_wrt_char]
+    rewrite [exp_zero]
+    rewrite [derivative_of_eps_wrt_char]
     simp only [Set.empty_union]
-    simp only [← derivative_distrib_union_of_countable_wrt_char]
+    rewrite [← derivative_distrib_union_of_countable_wrt_char]
     simp only [derivative_of_exp_succ_wrt_char]
-    simp only [concat_distrib_countable_union_left]
-    simp only [kleene_closure_eq_union_exp]
+    rewrite [concat_distrib_countable_union_left]
+    rewrite [kleene_closure_eq_union_exp]
+    apply Eq.refl
 
 
 -- 1.58
 theorem derivative_of_complement_wrt_char
   {α : Type}
-  [DecidableEq α]
   (L : Language α)
   (a : α) :
-  derivative Lᶜ [a] = (derivative L [a])ᶜ := rfl
+  derivative Lᶜ [a] = (derivative L [a])ᶜ :=
+  by
+    apply Eq.refl
   -- Why is this proof so short?
 
 
 theorem str_mem_lang_iff_eps_mem_derivative
   {α : Type}
-  [DecidableEq α]
   (L : Language α)
   (s : Str α) :
   s ∈ L ↔ [] ∈ derivative L s :=
   by
-    simp only [derivative]
-    simp
+    unfold derivative
+    simp only [Set.mem_setOf_eq, List.append_nil]
 
 
 theorem str_mem_lang_iff_nullify_derivative_eq_eps
@@ -872,18 +868,23 @@ theorem str_mem_lang_iff_nullify_derivative_eq_eps
   (s : Str α) :
   s ∈ L ↔ (derivative L s).nullify = {[]} :=
   by
-    simp only [str_mem_lang_iff_eps_mem_derivative L]
-    simp only [Language.nullify]
+    rewrite [str_mem_lang_iff_eps_mem_derivative L]
+    unfold Language.nullify
 
-    split_ifs
-    case pos c1 =>
-      simp
-      exact c1
-    case neg c1 =>
+    split
+    case isTrue c1 =>
+      constructor
+      · intro a1
+        apply Eq.refl
+      · intro a1
+        exact c1
+    case isFalse c1 =>
       simp only [c1]
-      simp
-      obtain s1 := Set.singleton_ne_empty []
-      exact id (Ne.symm s1)
+      constructor
+      · intro a1
+        contradiction
+      · intro a1
+        simp only [Set.empty_ne_singleton] at a1
 
 
 theorem lang_eq_union_nullify_union_concat_char_derivative_wrt_char
@@ -896,39 +897,49 @@ theorem lang_eq_union_nullify_union_concat_char_derivative_wrt_char
     constructor
     · intro a1
       cases cs
-      case _ =>
-        simp
+      case nil =>
+        simp only [Set.mem_union, Set.mem_iUnion]
         left
-        simp only [Language.nullify]
-        simp only [a1]
-        simp
-      case _ hd tl =>
-        simp
+        unfold Language.nullify
+        split
+        case isTrue c1 =>
+          simp only [Set.mem_singleton_iff]
+        case isFalse c1 =>
+          contradiction
+      case cons hd tl =>
+        simp only [Set.mem_union, Set.mem_iUnion]
         right
         apply Exists.intro hd
-        simp only [concat]
-        simp
-        simp only [derivative]
-        simp
-        exact a1
+        unfold concat
+        unfold derivative
+        simp only [Set.mem_singleton_iff, List.cons_append, List.nil_append, Set.mem_setOf_eq]
+        apply Exists.intro [hd]
+        constructor
+        · apply Eq.refl
+        · apply Exists.intro tl
+          constructor
+          · exact a1
+          · exact List.singleton_append
     · intro a1
-      simp at a1
+      simp only [Set.mem_union, Set.mem_iUnion] at a1
       cases a1
-      case _ a1_left =>
-        simp only [Language.nullify] at a1_left
-        simp at a1_left
-        cases a1_left
-        case _ a1_left_left a1_left_right =>
-          simp only [a1_left_right]
-          exact a1_left_left
-      case _ a1_right =>
-        obtain ⟨i, a2⟩ := a1_right
-        simp only [concat] at a2
-        simp only [derivative] at a2
-        simp at a2
-        obtain ⟨t, ⟨a3_left, a3_right⟩⟩ := a2
-        rw [← a3_right]
-        exact a3_left
+      case inl a1 =>
+        unfold Language.nullify at a1
+        split at a1
+        case isTrue c1 =>
+          simp only [Set.mem_singleton_iff] at a1
+          rewrite [a1]
+          exact c1
+        case isFalse c1 =>
+          simp only [Set.mem_empty_iff_false] at a1
+      case inr a1 =>
+        obtain ⟨i, a1⟩ := a1
+        unfold concat at a1
+        unfold derivative at a1
+        simp only [Set.mem_singleton_iff, List.cons_append, List.nil_append, Set.mem_setOf_eq, exists_eq_left] at a1
+        obtain ⟨t, ⟨a1_left, a1_right⟩⟩ := a1
+        rewrite [← a1_right]
+        exact a1_left
 
 
 theorem derivative_of_nullify_wrt_char
@@ -938,10 +949,17 @@ theorem derivative_of_nullify_wrt_char
   (a : α) :
   derivative (L.nullify) [a] = ∅ :=
   by
-    simp only [derivative]
-    simp
-    simp only [Language.nullify]
-    simp
+    unfold derivative
+    unfold Language.nullify
+    ext cs
+    simp only [List.cons_append, List.nil_append, Set.mem_ite_empty_right, Set.mem_singleton_iff]
+    simp only [Set.mem_setOf_eq]
+    constructor
+    · intro a1
+      obtain ⟨a1_left, a1_right⟩ := a1
+      simp only [reduceCtorEq] at a1_right
+    · intro a1
+      simp only [Set.mem_empty_iff_false] at a1
 
 
 theorem concat_derivative_kleene_closure_subset
@@ -955,22 +973,29 @@ theorem concat_derivative_kleene_closure_subset
   by
     simp only [Set.subset_def]
     intro x a1
-    simp only [concat] at a1
-    simp at a1
+    unfold concat at a1
+    unfold derivative at a1
+    simp only [Set.mem_setOf_eq] at a1
     obtain ⟨s, hs, t, ht, eq⟩ := a1
-    rw [← eq]
-    simp only [concat]
-    simp
+    rewrite [← eq]
+
+    unfold concat
+    unfold derivative
+    simp only [Set.mem_setOf_eq]
     apply Exists.intro []
-    simp
-    simp only [derivative]
-    simp only [Language.nullify]
-    simp
+    simp only [List.nil_append, exists_eq_right]
+    unfold Language.nullify
     constructor
-    · exact h1
+    · split
+      case isTrue c1 =>
+        simp only [Set.mem_singleton_iff]
+      case isFalse c1 =>
+        simp only [Set.mem_setOf_eq, List.append_nil] at c1
+        contradiction
     · simp only [String.str_append_assoc]
       apply append_kleene_closure_closed
-      · exact mem_language_mem_kleene_closure L (a ++ s) hs
+      · apply mem_language_mem_kleene_closure
+        exact hs
       · exact ht
 
 
@@ -990,7 +1015,8 @@ noncomputable def foo'
       have : v.length ≤ tl.length := h.length_le
       foo' L v
     let l2 := l1.attach.flatMap fun ⟨v, h⟩ => by
-      simp [l1, List.mem_filter] at h
+      simp only [l1] at h
+      simp only [List.mem_filter, List.mem_tails, decide_eq_true_eq] at h
       exact IH v h.1
     (hd :: tl) :: l2
 termination_by s.length
@@ -1015,7 +1041,7 @@ theorem derivative_of_kleene_closure_wrt_str
         have : v.length < s.length :=
         by
           rw [e]
-          simp
+          simp only [List.length_cons]
           apply Nat.lt_succ_of_le
           exact List.IsSuffix.length_le h
         exact derivative_of_kleene_closure_wrt_str L v
@@ -1028,24 +1054,25 @@ theorem derivative_of_kleene_closure_wrt_str
 
       simp only [foo']
 
-      simp
+      simp only [gt_iff_lt, List.mem_filter, List.mem_tails, decide_eq_true_eq,
+        List.flatMap_subtype, List.unattach_attach, List.mem_cons, List.mem_flatMap,
+        Set.iUnion_iUnion_eq_or_left, Set.iUnion_exists, Set.biUnion_and']
       congr! 1
       ext cs
-
-      simp only [List.length_pos]
-      simp
+      simp only [Set.mem_sUnion, Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+      simp only [List.length_pos_iff]
 
       constructor
       · intro a1
         obtain ⟨M, ⟨u, v, a2, a3, a4⟩, a5⟩ := a1
 
-        have s1 : v.IsSuffix tl :=
+        have s1 : List.IsSuffix v tl :=
         by
           simp only [List.IsSuffix]
           apply Exists.intro u
           exact a2
 
-        specialize IH v s1 a3
+        specialize IH v s1
 
         rw [a4] at a5
         clear a4
@@ -1059,16 +1086,17 @@ theorem derivative_of_kleene_closure_wrt_str
           · constructor
             · exact a3
             · rw [← a2]
-              simp
+              simp only [List.length_append, Nat.add_sub_cancel, List.take_left']
               exact a6
         · rw [IH] at a7
-          simp at a7
-          exact a7
+          · simp only [Set.mem_iUnion, exists_prop] at a7
+            exact a7
+          · exact a3
       · intro a1
         obtain ⟨i, ⟨a2, a3, a4⟩, j, a5, a6⟩ := a1
 
         simp only [derivative] at a4
-        simp at a4
+        simp only [List.cons_append, Set.mem_setOf_eq, List.append_nil] at a4
 
         specialize IH i a2 a3
 
@@ -1076,7 +1104,7 @@ theorem derivative_of_kleene_closure_wrt_str
         obtain ⟨t, ht⟩ := a2
 
         rw [← ht] at a4
-        simp at a4
+        simp only [List.length_append, Nat.add_sub_cancel, List.take_left'] at a4
 
         apply Exists.intro (derivative (kleene_closure α L) i)
         constructor
@@ -1092,10 +1120,13 @@ theorem derivative_of_kleene_closure_wrt_str
                 simp only [concat_eps_left]
               case neg c1 =>
                 simp only [derivative] at c1
-                simp at c1
+                simp only [List.cons_append, Set.mem_setOf_eq, List.append_nil] at c1
                 contradiction
         · rw [IH]
-          simp
+          simp only [Set.mem_iUnion, exists_prop]
           apply Exists.intro j
-          tauto
+          exact ⟨a5, a6⟩
 termination_by s.length
+
+
+end Language
