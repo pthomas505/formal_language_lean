@@ -1071,7 +1071,6 @@ theorem derivative_of_kleene_closure_wrt_str
           exact a1_left_left
 
         rewrite [a1_left_right_right] at a1_right
-        clear a1_left_right_right
         rewrite [mem_concat_nullify_left_iff] at a1_right
         obtain ⟨a1_right_left, a1_right_right⟩ := a1_right
         unfold derivative at a1_right_left
