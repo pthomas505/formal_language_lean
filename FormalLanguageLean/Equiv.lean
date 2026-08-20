@@ -46,7 +46,7 @@ theorem L_equiv_iff_deriv_eq
   (s t : Str α) :
   L_equiv L s t ↔ derivative L s = derivative L t :=
   by
-    rfl
+    apply Iff.refl
 
 
 theorem L_equiv_refl
@@ -55,19 +55,19 @@ theorem L_equiv_refl
   (s : Str α) :
   L_equiv L s s :=
   by
-    rfl
+    unfold L_equiv
+    apply Eq.refl
 
 
 theorem L_equiv_symm
   {α : Type}
   (L : Language α)
-  (s t : Str α) :
-  L_equiv L s t → L_equiv L t s :=
+  (s t : Str α)
+  (h1 : L_equiv L s t) :
+  L_equiv L t s :=
   by
-    simp only [L_equiv]
-    intro a1
-    symm
-    exact a1
+    unfold L_equiv
+    exact Eq.symm h1
 
 
 theorem L_equiv_trans
@@ -78,10 +78,12 @@ theorem L_equiv_trans
   (h2 : L_equiv L s t) :
   L_equiv L r t :=
   by
-    simp only [L_equiv] at *
-    trans {u | s ++ u ∈ L}
-    · exact h1
-    · exact h2
+    unfold L_equiv at h1
+
+    unfold L_equiv at h2
+
+    unfold L_equiv
+    exact Eq.trans h1 h2
 
 
 instance (α : Type) (L : Language α) : IsEquiv (Str α) (L_equiv L) :=
@@ -113,7 +115,7 @@ example
   (s : Str α) :
   Str.equiv_class L s = { t | derivative L s = derivative L t } :=
   by
-    rfl
+    apply Eq.refl
 
 
 example
@@ -123,39 +125,47 @@ example
   Str.equiv_class L [a] ∩ {s : Str α | s.length = 1} =
     { b | derivative L [a] = derivative L b ∧ b.length = 1 } :=
   by
-    rfl
+    apply Eq.refl
 
 
 theorem L_equiv_union
   {α : Type}
-  [DecidableEq α]
   (L1 L2 : Language α)
   (s t : Str α)
   (h1 : L_equiv L1 s t)
   (h2 : L_equiv L2 s t) :
   L_equiv (L1 ∪ L2) s t :=
   by
-    simp only [L_equiv_iff_deriv_eq] at *
-    rw [derivative_of_union_wrt_str L1 L2 s]
-    rw [derivative_of_union_wrt_str L1 L2 t]
-    rw [h1]
-    rw [h2]
+    rewrite [L_equiv_iff_deriv_eq] at h1
+
+    rewrite [L_equiv_iff_deriv_eq] at h2
+
+    rewrite [L_equiv_iff_deriv_eq]
+    rewrite [derivative_of_union_wrt_str L1 L2 s]
+    rewrite [derivative_of_union_wrt_str L1 L2 t]
+    rewrite [h1]
+    rewrite [h2]
+    apply Eq.refl
 
 
 theorem L_equiv_intersection
   {α : Type}
-  [DecidableEq α]
   (L1 L2 : Language α)
   (s t : Str α)
   (h1 : L_equiv L1 s t)
   (h2 : L_equiv L2 s t) :
   L_equiv (L1 ∩ L2) s t :=
   by
-    simp only [L_equiv_iff_deriv_eq] at *
-    rw [derivative_of_intersection_wrt_str L1 L2 s]
-    rw [derivative_of_intersection_wrt_str L1 L2 t]
-    rw [h1]
-    rw [h2]
+    rewrite [L_equiv_iff_deriv_eq] at h1
+
+    rewrite [L_equiv_iff_deriv_eq] at h2
+
+    rewrite [L_equiv_iff_deriv_eq]
+    rewrite [derivative_of_intersection_wrt_str L1 L2 s]
+    rewrite [derivative_of_intersection_wrt_str L1 L2 t]
+    rewrite [h1]
+    rewrite [h2]
+    apply Eq.refl
 
 
 end Language
