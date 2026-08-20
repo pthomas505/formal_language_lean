@@ -6,7 +6,6 @@ set_option linter.style.emptyLine false
 set_option linter.style.longLine false
 
 
-
 -- https://arxiv.org/pdf/1907.13577
 
 

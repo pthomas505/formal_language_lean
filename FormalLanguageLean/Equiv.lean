@@ -1,7 +1,9 @@
 import FormalLanguageLean.Derivative
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -154,3 +156,6 @@ theorem L_equiv_intersection
     rw [derivative_of_intersection_wrt_str L1 L2 t]
     rw [h1]
     rw [h2]
+
+
+end Language
