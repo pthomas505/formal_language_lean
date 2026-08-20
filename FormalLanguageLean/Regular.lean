@@ -112,7 +112,7 @@ theorem derivative_of_reg_lang_wrt_str_is_reg_lang
 theorem all_derivative_of_reg_lang_wrt_str_mem_finset
   {α : Type}
   (L : Language α)
-  (h1: IsRegLang L) :
+  (h1 : IsRegLang L) :
   ∃ (T : Finset (Language α)), ∀ (s : Str α), derivative L s ∈ T :=
   by
     classical
@@ -181,7 +181,7 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
       · apply Exists.intro (derivative L2 s)
         constructor
         · exact a2 s
-        . apply Eq.refl
+        · apply Eq.refl
     case concat L1 L2 L1_ih1 L2_ih1 L1_ih2 L2_ih2 =>
       obtain ⟨T1, a1⟩ := L1_ih2
       obtain ⟨T2, a2⟩ := L2_ih2
