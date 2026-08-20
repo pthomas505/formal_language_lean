@@ -1035,28 +1035,26 @@ theorem derivative_of_kleene_closure_wrt_str
     case nil =>
       contradiction
     case cons hd tl =>
-      have IH : ∀ (v : List α), v.IsSuffix tl → ¬ v = [] → derivative (kleene_closure α L) v = ⋃ t ∈ foo' L v, concat (derivative L t) (kleene_closure α L) :=
+      have ih : ∀ (v : List α), v.IsSuffix tl → ¬ v = [] → derivative (kleene_closure α L) v = ⋃ t ∈ foo' L v, concat (derivative L t) (kleene_closure α L) :=
       by
         intro v h
         have : v.length < s.length :=
         by
-          rw [e]
+          rewrite [e]
           simp only [List.length_cons]
           apply Nat.lt_succ_of_le
           exact List.IsSuffix.length_le h
         exact derivative_of_kleene_closure_wrt_str L v
 
-      rw [derivative_wrt_cons]
-      simp only [derivative_of_kleene_closure_wrt_char]
-      simp only [derivative_of_concat_wrt_str]
-      simp only [← derivative_wrt_append]
+      rewrite [derivative_wrt_cons]
+      rewrite [derivative_of_kleene_closure_wrt_char]
+      rewrite [derivative_of_concat_wrt_str]
+      rewrite [← derivative_wrt_append]
       simp only [List.singleton_append]
 
-      simp only [foo']
+      rewrite [foo']
 
-      simp only [gt_iff_lt, List.mem_filter, List.mem_tails, decide_eq_true_eq,
-        List.flatMap_subtype, List.unattach_attach, List.mem_cons, List.mem_flatMap,
-        Set.iUnion_iUnion_eq_or_left, Set.iUnion_exists, Set.biUnion_and']
+      simp only [gt_iff_lt, List.mem_filter, List.mem_tails, decide_eq_true_eq, List.flatMap_subtype, List.unattach_attach, List.mem_cons, List.mem_flatMap, Set.iUnion_iUnion_eq_or_left, Set.iUnion_exists, Set.biUnion_and']
       congr! 1
       ext cs
       simp only [Set.mem_sUnion, Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
@@ -1064,47 +1062,50 @@ theorem derivative_of_kleene_closure_wrt_str
 
       constructor
       · intro a1
-        obtain ⟨M, ⟨u, v, a2, a3, a4⟩, a5⟩ := a1
+        obtain ⟨M, ⟨⟨u, ⟨v, ⟨a1_left_left, ⟨a1_left_right_left, a1_left_right_right⟩⟩⟩⟩, a1_right⟩ ⟩ := a1
 
         have s1 : List.IsSuffix v tl :=
         by
           simp only [List.IsSuffix]
           apply Exists.intro u
-          exact a2
+          exact a1_left_left
 
-        specialize IH v s1
+        rewrite [a1_left_right_right] at a1_right
+        clear a1_left_right_right
+        rewrite [mem_concat_nullify_left_iff] at a1_right
+        obtain ⟨a1_right_left, a1_right_right⟩ := a1_right
+        unfold derivative at a1_right_left
+        simp only [List.cons_append, List.nil_append, Set.mem_setOf_eq, List.append_nil] at a1_right_left
 
-        rw [a4] at a5
-        clear a4
-        simp only [mem_concat_nullify_left_iff] at a5
-        obtain ⟨a6, a7⟩ := a5
+        specialize ih v s1 a1_left_right_left
 
         apply Exists.intro v
         constructor
         · constructor
           · exact s1
           · constructor
-            · exact a3
-            · rw [← a2]
+            · exact a1_left_right_left
+            · rewrite [← a1_left_left]
               simp only [List.length_append, Nat.add_sub_cancel, List.take_left']
-              exact a6
-        · rw [IH] at a7
-          · simp only [Set.mem_iUnion, exists_prop] at a7
-            exact a7
-          · exact a3
+              unfold derivative
+              simp only [List.cons_append, Set.mem_setOf_eq, List.append_nil]
+              exact a1_right_left
+        · rewrite [ih] at a1_right_right
+          simp only [Set.mem_iUnion, exists_prop] at a1_right_right
+          exact a1_right_right
       · intro a1
-        obtain ⟨i, ⟨a2, a3, a4⟩, j, a5, a6⟩ := a1
+        obtain ⟨i, ⟨⟨a1_left_left, ⟨a1_left_right_left, a1_left_right_right⟩⟩, ⟨j, a1_right⟩⟩⟩ := a1
 
-        simp only [derivative] at a4
-        simp only [List.cons_append, Set.mem_setOf_eq, List.append_nil] at a4
+        unfold derivative at a1_left_right_right
+        simp only [List.cons_append, Set.mem_setOf_eq, List.append_nil] at a1_left_right_right
 
-        specialize IH i a2 a3
+        specialize ih i a1_left_left a1_left_right_left
 
-        simp only [List.IsSuffix] at a2
-        obtain ⟨t, ht⟩ := a2
+        simp only [List.IsSuffix] at a1_left_left
+        obtain ⟨t, ht⟩ := a1_left_left
 
-        rw [← ht] at a4
-        simp only [List.length_append, Nat.add_sub_cancel, List.take_left'] at a4
+        rewrite [← ht] at a1_left_right_right
+        simp only [List.length_append, Nat.add_sub_cancel, List.take_left'] at a1_left_right_right
 
         apply Exists.intro (derivative (kleene_closure α L) i)
         constructor
@@ -1113,19 +1114,20 @@ theorem derivative_of_kleene_closure_wrt_str
           constructor
           · exact ht
           · constructor
-            · exact a3
+            · exact a1_left_right_left
             · simp only [Language.nullify]
-              split_ifs
-              case pos c1 =>
-                simp only [concat_eps_left]
-              case neg c1 =>
-                simp only [derivative] at c1
-                simp only [List.cons_append, Set.mem_setOf_eq, List.append_nil] at c1
+              split
+              case isTrue c1 =>
+                rewrite [concat_eps_left]
+                apply Eq.refl
+              case isFalse c1 =>
+                unfold derivative at c1
+                simp only [List.cons_append, List.nil_append, Set.mem_setOf_eq, List.append_nil] at c1
                 contradiction
-        · rw [IH]
+        · rewrite [ih]
           simp only [Set.mem_iUnion, exists_prop]
           apply Exists.intro j
-          exact ⟨a5, a6⟩
+          exact a1_right
 termination_by s.length
 
 
