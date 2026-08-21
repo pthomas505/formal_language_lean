@@ -208,7 +208,7 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
           · exact a2 v
           · exact a2_right_right
 
-      have : ∀ (s : Str α), Finite {M : Language α | ∃ (u : Str α) (v : Str α), u ++ v = s ∧ ¬ v = [] ∧ M = concat (derivative L1 u).nullify (derivative L2 v)} :=
+      have s2 : ∀ (s : Str α), Finite {M : Language α | ∃ (u : Str α) (v : Str α), u ++ v = s ∧ ¬ v = [] ∧ M = concat (derivative L1 u).nullify (derivative L2 v)} :=
       by
         intro s
         exact Finite.Set.subset B (s1 s)
@@ -218,58 +218,125 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
 
       let T := A.biUnion (fun (M1 : Language α) => C.biUnion (fun (M2 : Language α) => {M1 ∪ M2}))
 
+      simp only [← gt_iff_lt, ← List.length_pos_iff] at s1
+
+      unfold B at s1
+      simp only [Finset.coe_biUnion, SetLike.mem_coe, Finset.coe_singleton] at s1
+
+      simp only [← gt_iff_lt, ← List.length_pos_iff] at s2
+
+      have s3 : ∀ (s : Str α), ∃ (D : Finset (Language α)), ∀ (L : Language α), L ∈ D ↔ L ∈ {M | ∃ u v, u ++ v = s ∧ List.length v > 0 ∧ M = (L1.derivative u).nullify.concat (L2.derivative v)} :=
+      by
+        intro s
+        apply Set.Finite.exists_finset
+        apply s2
+
       apply Exists.intro T
       intro s
-      simp only [T]
-      simp only [A]
-      simp only [C]
-      simp only [Finset.singleton_biUnion, Finset.mem_biUnion, Finset.mem_singleton, Finset.mem_image, Finset.mem_powerset]
 
-      apply Exists.intro (concat (derivative L1 s) L2)
+      unfold T
+      unfold A
+      unfold C
+      unfold B
+      simp only [Finset.singleton_biUnion, Finset.mem_biUnion, Finset.mem_singleton, Finset.mem_image, Finset.mem_powerset, exists_exists_and_eq_and]
+
+      simp?
+
+      specialize s3 s
+      obtain ⟨D, s3⟩ := s3
+
+      apply Exists.intro (derivative L1 s)
       constructor
-      · apply Exists.intro (derivative L1 s)
+      · apply a1
+      · apply Exists.intro D
         constructor
-        · exact a1 s
-        · apply Eq.refl
-      · simp?
-        apply Exists.intro ({M : Language α | ∃ (u : Str α) (v : Str α), u ++ v = s ∧ ¬ v = [] ∧ M = concat (derivative L1 u).nullify (derivative L2 v)}).toFinite.toFinset
-        constructor
-        · simp only [Set.Finite.toFinset_subset]
-          exact s1 s
-        · simp only [List.length_pos_iff]
-          simp
-    case kleene_closure L1 _ L1_ih2 =>
+        · simp only [Finset.subset_iff]
+          intro M a3
+          simp only [Finset.mem_biUnion, Finset.mem_singleton]
+          specialize s3 M
+          simp only [Set.mem_setOf_eq] at s3
+          obtain ⟨mp, mpr⟩ := s3
+          specialize mp a3
+          obtain ⟨u, ⟨v, mp_1, mp_2, mp_3⟩ ⟩ := mp
+          apply Exists.intro (L1.derivative u)
+          constructor
+          · apply a1
+          · apply Exists.intro (L2.derivative v)
+            constructor
+            · apply a2
+            · exact mp_3
+        · congr 1
+          ext cs
+          simp only [Set.mem_sUnion, Set.mem_setOf_eq]
+          constructor
+          · intro a3
+            obtain ⟨t, ⟨a3_left, a3_right⟩⟩ := a3
+            apply Exists.intro t
+            constructor
+            · simp only [SetLike.mem_coe]
+              rewrite [s3]
+              simp only [gt_iff_lt, Set.mem_setOf_eq]
+              exact a3_left
+            · exact a3_right
+          · intro a3
+            obtain ⟨t, ⟨a3_left, a3_right⟩⟩ := a3
+            apply Exists.intro t
+            constructor
+            · simp only [gt_iff_lt, Set.mem_setOf_eq] at s3
+              simp only [SetLike.mem_coe] at a3_left
+              rewrite [← s3]
+              exact a3_left
+            · exact a3_right
+    case kleene_closure L1 L1_ih1 L1_ih2 =>
       obtain ⟨T, a1⟩ := L1_ih2
 
       have s1 : ∀ (s : Str α), {M : Language α | ∃ (t : List α), t ∈ foo' L1 s ∧ derivative L1 t = M} ⊆ (T : Set (Language α)) :=
       by
         intro s
         simp only [Set.subset_def]
-        simp
-        intro t _
-        exact a1 t
+        simp only [Set.mem_setOf_eq, SetLike.mem_coe, forall_exists_index]
+        intro t a2 a3
+        obtain ⟨a3_left, a3_right⟩ := a3
+        rewrite [← a3_right]
+        apply a1
 
       have s2 : ∀ (s : Str α), Finite {M : Language α | ∃ (t : List α), t ∈ foo' L1 s ∧ derivative L1 t = M} :=
       by
         intro s
-        simp
+        simp only [Set.coe_setOf]
         exact Set.Finite.subset (Finset.finite_toSet T) (s1 s)
 
       have s3 : ∀ (s : Str α), (⋃ t ∈ foo' L1 s, derivative L1 t) = ⋃₀ {M : Language α | ∃ (t : List α), t ∈ foo' L1 s ∧ derivative L1 t = M} :=
       by
         intro s
         ext cs
-        simp
-
+        simp only [Set.mem_iUnion, exists_prop, Set.mem_sUnion, Set.mem_setOf_eq]
+        constructor
+        · intro a2
+          obtain ⟨i, ⟨a2_left, a2_right⟩⟩ := a2
+          apply Exists.intro (L1.derivative i)
+          constructor
+          · apply Exists.intro i
+            exact ⟨a2_left, rfl⟩
+          · exact a2_right
+        · intro a2
+          obtain ⟨t, ⟨⟨i, ⟨a2_left_left, a2_left_right⟩⟩, a2_right⟩⟩ := a2
+          apply Exists.intro i
+          constructor
+          · exact a2_left_left
+          · rewrite [a2_left_right]
+            exact a2_right
       have s4 : ∃ (S : Finset (Language α)), ∀ (s : Str α), (⋃ t ∈ foo' L1 s, derivative L1 t) ∈ S :=
       by
         simp only [s3]
         apply Exists.intro (T.powerset.image (fun (S : Finset (Language α)) => (S : Set (Language α)).sUnion))
         intro s
-        simp
+        simp only [Finset.mem_image, Finset.mem_powerset]
         apply Exists.intro {M : Language α | ∃ (t : List α), t ∈ foo' L1 s ∧ derivative L1 t = M}.toFinite.toFinset
-        simp
-        exact s1 s
+        constructor
+        · simp only [Set.Finite.toFinset_subset]
+          apply s1
+        · simp only [Set.Finite.coe_toFinset]
 
       obtain ⟨S, a2⟩ := s4
 
@@ -282,32 +349,34 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
         simp only [A]
         simp only [c1]
         simp only [derivative_wrt_eps]
-        simp
+        simp only [Finset.singleton_union, Finset.mem_insert, Finset.mem_biUnion, Finset.mem_singleton]
+        left
+        exact True.intro
       case neg =>
         obtain s1 := derivative_of_kleene_closure_wrt_str L1 s c1
-        rw [s1]
+        rewrite [s1]
         clear s1
 
         have s2 : ⋃ t ∈ foo' L1 s, concat (derivative L1 t) (kleene_closure α L1) = concat (⋃ t ∈ foo' L1 s, derivative L1 t) (kleene_closure α L1) :=
         by
           simp only [concat]
-          simp
+          simp only [Set.mem_iUnion, exists_prop]
           ext cs
-          simp
+          simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
           constructor
           · intro a3
             obtain ⟨i, hi, s, hs, t, ht, eq⟩ := a3
-            rw [← eq]
+            rewrite [← eq]
             exact ⟨s, ⟨i, hi, hs⟩, t, ht, rfl⟩
           · intro a3
             obtain ⟨s, ⟨i, hi, hs⟩, t, ht, eq⟩ := a3
-            rw [← eq]
+            rewrite [← eq]
             exact ⟨i, hi, s, hs, t, ht, rfl⟩
-        rw [s2]
+        rewrite [s2]
         clear s2
 
         simp only [A]
-        simp
+        simp only [Finset.singleton_union, Finset.mem_insert, Finset.mem_biUnion, Finset.mem_singleton]
         right
         apply Exists.intro (⋃ t ∈ foo' L1 s, derivative L1 t)
         exact ⟨a2 s, rfl⟩
