@@ -240,14 +240,15 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
       unfold B
       simp only [Finset.singleton_biUnion, Finset.mem_biUnion, Finset.mem_singleton, Finset.mem_image, Finset.mem_powerset, exists_exists_and_eq_and]
 
-      simp?
-
       specialize s3 s
       obtain ⟨D, s3⟩ := s3
 
-      apply Exists.intro (derivative L1 s)
+      apply Exists.intro ((derivative L1 s).concat L2)
       constructor
-      · apply a1
+      · apply Exists.intro (derivative L1 s)
+        constructor
+        · apply a1
+        · apply Eq.refl
       · apply Exists.intro D
         constructor
         · simp only [Finset.subset_iff]
