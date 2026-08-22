@@ -3,7 +3,9 @@ import FormalLanguageLean.Regular
 import Mathlib.Data.Finset.Basic
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -88,10 +90,11 @@ example
   by
     let D' : DFA α σ := ⟨D.step, D.step D.starting_state a, D.accepting_state_list⟩
     apply Exists.intro D'
-    rw [h1]
-    simp only [Language.derivative]
-    simp only [DFA.LanguageOf]
-    simp only [DFA.accepts]
-    simp only [DFA.eval]
-    simp only [DFA.eval_from]
-    simp
+    rewrite [h1]
+    unfold Language.derivative
+    unfold DFA.LanguageOf
+    unfold DFA.accepts
+    unfold DFA.eval
+    unfold DFA.eval_from
+    unfold D'
+    simp only [List.cons_append, List.nil_append, Set.mem_setOf_eq, List.foldl_cons]
