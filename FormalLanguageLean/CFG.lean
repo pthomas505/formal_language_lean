@@ -5,7 +5,9 @@ import MathlibExtraLean.List
 import FormalLanguageLean.Kleene
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://github.com/mn200/CFL-HOL
@@ -44,9 +46,9 @@ instance
   (c : Symbol NTS TS) :
   Decidable c.isNTS :=
   by
-    simp only [Symbol.isNTS]
     cases c
     all_goals
+      simp only [Symbol.isNTS]
       infer_instance
 
 
@@ -63,9 +65,9 @@ instance
   (c : Symbol NTS TS) :
   Decidable c.isTS :=
   by
-    simp only [Symbol.isTS]
     cases c
     all_goals
+      simp only [Symbol.isTS]
       infer_instance
 
 
@@ -86,7 +88,7 @@ theorem symbol_is_nts_imp_exists_nts
     cases c
     case nts x =>
       apply Exists.intro x
-      rfl
+      apply Eq.refl
     case ts x =>
       simp only [Symbol.isNTS] at h1
 
@@ -110,7 +112,7 @@ theorem symbol_is_ts_imp_exists_ts
       simp only [Symbol.isTS] at h1
     case ts x =>
       apply Exists.intro x
-      rfl
+      apply Eq.refl
 
 
 theorem symbol_not_nts_iff_is_ts
@@ -120,14 +122,14 @@ theorem symbol_not_nts_iff_is_ts
   ¬ c.isNTS ↔ c.isTS :=
   by
     cases c
+    case nts x =>
+      simp only [Symbol.isNTS]
+      simp only [Symbol.isTS]
+      exact not_true
     case _ x =>
       simp only [Symbol.isNTS]
       simp only [Symbol.isTS]
-      simp
-    case _ x =>
-      simp only [Symbol.isNTS]
-      simp only [Symbol.isTS]
-      simp
+      exact not_false_iff
 
 
 theorem symbol_not_ts_iff_is_nts
@@ -137,14 +139,14 @@ theorem symbol_not_ts_iff_is_nts
   ¬ c.isTS ↔ c.isNTS :=
   by
     cases c
-    case _ x =>
+    case nts x =>
       simp only [Symbol.isNTS]
       simp only [Symbol.isTS]
-      simp
-    case _ x =>
+      exact not_false_iff
+    case ts x =>
       simp only [Symbol.isNTS]
       simp only [Symbol.isTS]
-      simp
+      exact not_true
 
 
 structure Rule (NTS : Type) (TS : Type) where
@@ -238,15 +240,15 @@ example
     constructor
     · intro a1
       induction a1
-      case _ =>
+      case refl =>
         exact Relation.ReflTransGen.refl
-      case _ sl_1 sl_2 _ ih_2 ih_3 =>
+      case trans sl_1 sl_2 ih_1 ih_2 ih_3 =>
         exact Relation.ReflTransGen.tail ih_3 ih_2
     · intro a1
       induction a1
-      case _ =>
+      case refl =>
         exact is_derivation_alt.refl lsl
-      case _ sl_1 sl_2 _ ih_2 ih_3 =>
+      case tail sl_1 sl_2 ih_1 ih_2 ih_3 =>
         exact is_derivation_alt.trans lsl sl_1 sl_2 ih_3 ih_2
 
 
@@ -283,19 +285,20 @@ theorem is_derivation_step_same_append_left
   (h1 : is_derivation_step G u v) :
   is_derivation_step G (x ++ u) (x ++ v) :=
   by
-    simp only [is_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, a1, a2, a3⟩ := h1
-    rw [a2]
-    rw [a3]
-    simp only [is_derivation_step]
+    unfold is_derivation_step at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩ := h1
+
+    rewrite [h1_right_left]
+    rewrite [h1_right_right]
+    unfold is_derivation_step
     apply Exists.intro R
     apply Exists.intro (x ++ sl_1)
     apply Exists.intro sl_2
     constructor
-    · exact a1
+    · exact h1_left
     · constructor
-      · simp
-      · simp
+      · simp only [List.append_assoc, List.cons_append, List.nil_append]
+      · simp only [List.append_assoc]
 
 
 theorem is_derivation_step_same_append_right
@@ -307,19 +310,20 @@ theorem is_derivation_step_same_append_right
   (h1 : is_derivation_step G u v) :
   is_derivation_step G (u ++ x) (v ++ x) :=
   by
-    simp only [is_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, a1, a2, a3⟩ := h1
-    rw [a2]
-    rw [a3]
-    simp only [is_derivation_step]
+    unfold is_derivation_step at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩ := h1
+
+    rewrite [h1_right_left]
+    rewrite [h1_right_right]
+    unfold is_derivation_step
     apply Exists.intro R
     apply Exists.intro sl_1
     apply Exists.intro (sl_2 ++ x)
     constructor
-    · exact a1
+    · exact h1_left
     · constructor
-      · simp
-      · simp
+      · simp only [List.append_assoc, List.cons_append, List.nil_append]
+      · simp only [List.append_assoc]
 
 
 theorem rtc_is_derivation_step_same_append_left
@@ -334,7 +338,7 @@ theorem rtc_is_derivation_step_same_append_left
     induction h1 using Relation.ReflTransGen.head_induction_on
     case refl =>
       exact Relation.ReflTransGen.refl
-    case head a b ih_1 _ ih_3 =>
+    case head a b ih_1 ih_2 ih_3 =>
       apply Relation.ReflTransGen.head
       · exact is_derivation_step_same_append_left G a b x ih_1
       · exact ih_3
@@ -352,7 +356,7 @@ theorem rtc_is_derivation_step_same_append_right
     induction h1 using Relation.ReflTransGen.head_induction_on
     case refl =>
       exact Relation.ReflTransGen.refl
-    case head a b ih_1 _ ih_3 =>
+    case head a b ih_1 ih_2 ih_3 =>
       apply Relation.ReflTransGen.head
       · exact is_derivation_step_same_append_right G a b x ih_1
       · exact ih_3
@@ -370,9 +374,14 @@ theorem derives_append
     -- (M ++ P) (N ++ P) ; (N ++ P) (N ++ Q)
 
     have s1 : Relation.ReflTransGen (is_derivation_step G) (M ++ P) (N ++ P) :=
-      rtc_is_derivation_step_same_append_right G M N P h1
+    by
+      apply rtc_is_derivation_step_same_append_right
+      exact h1
 
-    have s2 : Relation.ReflTransGen (is_derivation_step G) (N ++ P) (N ++ Q) := rtc_is_derivation_step_same_append_left G P Q N h2
+    have s2 : Relation.ReflTransGen (is_derivation_step G) (N ++ P) (N ++ Q) :=
+    by
+      apply rtc_is_derivation_step_same_append_left
+      exact h2
 
     exact Relation.ReflTransGen.trans s1 s2
 
@@ -381,17 +390,20 @@ theorem res1
   {NTS : Type}
   {TS : Type}
   (G : CFG NTS TS)
-  (lhs: NTS)
-  (rhs: Str (Symbol NTS TS))
+  (lhs : NTS)
+  (rhs : Str (Symbol NTS TS))
   (h1 : ⟨lhs, rhs⟩ ∈ G.rule_list) :
   is_derivation_step G [Symbol.nts lhs] rhs :=
   by
-    simp only [is_derivation_step]
+    unfold is_derivation_step
     apply Exists.intro ⟨lhs, rhs⟩
     apply Exists.intro []
     apply Exists.intro []
-    simp
-    exact h1
+    constructor
+    · exact h1
+    · constructor
+      · simp only [List.nil_append, List.append_nil]
+      · simp only [List.nil_append, List.append_nil]
 
 
 theorem res2
@@ -431,10 +443,13 @@ theorem slres
   by
     cases sl_1
     case nil =>
-      simp at h1
-      exact h1.left
+      simp only [List.nil_append, List.cons_append, List.cons.injEq, Symbol.nts.injEq] at h1
+      obtain ⟨h1_left, h1_right⟩ := h1
+      exact h1_left
     case cons hd tl =>
-      simp at h1
+      simp only [List.cons_append, List.append_assoc, List.nil_append, List.cons.injEq, List.append_eq_nil_iff, reduceCtorEq] at h1
+      obtain ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩ := h1
+      contradiction
 
 
 theorem slres2
@@ -447,11 +462,13 @@ theorem slres2
   by
     cases sl_1
     case nil =>
-      simp at h1
-      simp
-      exact h1.right
+      simp only [List.nil_append, List.cons_append, List.cons.injEq, Symbol.nts.injEq] at h1
+      obtain ⟨h1_left, h1_right⟩ := h1
+      exact ⟨rfl, h1_right⟩
     case cons hd tl =>
-      simp at h1
+      simp only [List.cons_append, List.append_assoc, List.nil_append, List.cons.injEq, List.append_eq_nil_iff, reduceCtorEq] at h1
+      obtain ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩ := h1
+      contradiction
 
 
 theorem rgr_r8
@@ -467,7 +484,7 @@ theorem rgr_r8
   by
     apply Exists.intro r1
     apply Exists.intro r2
-    rw [h1] at h2
+    rewrite [h1] at h2
     exact h2
 
 
@@ -479,12 +496,13 @@ theorem upgr_r11
   (h1 : is_derivation_step G [Symbol.nts lhs] [Symbol.nts rhs]) :
   ⟨lhs, [Symbol.nts rhs]⟩ ∈ G.rule_list :=
   by
-    simp only [is_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, a1, a2, a3⟩ := h1
+    unfold is_derivation_step at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩ := h1
     sorry
 
 
 -------------------------------------------------------------------------------
+
 
 theorem leftmost_derivation_step_is_derivation_step
   {NTS : Type}
@@ -494,10 +512,11 @@ theorem leftmost_derivation_step_is_derivation_step
   (h1 : is_leftmost_derivation_step G lsl rsl) :
   is_derivation_step G lsl rsl :=
   by
-    simp only [is_leftmost_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, _, a2, a3⟩ := h1
-    simp only [is_derivation_step]
-    exact ⟨R, sl_1, sl_2, a2, a3⟩
+    unfold is_leftmost_derivation_step at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, ⟨h1_right_right_left, h1_right_right_right⟩⟩⟩⟩⟩⟩ := h1
+
+    unfold is_derivation_step
+    exact ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_right_left, ⟨h1_right_right_left, h1_right_right_right⟩⟩⟩⟩⟩
 
 
 theorem rightmost_derivation_step_is_derivation_step
@@ -508,10 +527,11 @@ theorem rightmost_derivation_step_is_derivation_step
   (h1 : is_rightmost_derivation_step G lsl rsl) :
   is_derivation_step G lsl rsl :=
   by
-    simp only [is_rightmost_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, _, a2, a3⟩ := h1
-    simp only [is_derivation_step]
-    exact ⟨R, sl_1, sl_2, a2, a3⟩
+    unfold is_rightmost_derivation_step at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, ⟨h1_right_right_left, h1_right_right_right⟩⟩⟩⟩⟩⟩ := h1
+
+    unfold is_derivation_step
+    exact ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_right_left, ⟨h1_right_right_left, h1_right_right_right⟩⟩⟩⟩⟩
 
 
 theorem derivation_step_to_terminal_string_is_leftmost_derivation_step
@@ -524,17 +544,19 @@ theorem derivation_step_to_terminal_string_is_leftmost_derivation_step
   is_leftmost_derivation_step G sl s :=
   by
     simp only [is_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, a1, a2, a3⟩ := h1
-    rw [a3] at h2
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩ := h1
+
+    rw [h1_right_right] at h2
     have s1 : ∀ (c : Symbol NTS TS), c ∈ sl_1 → c.isTS :=
     by
-      intro c a4
+      intro c a1
       apply h2 c
-      simp
+      simp only [List.append_assoc, List.mem_append]
       left
-      exact a4
-    simp only [is_leftmost_derivation_step]
-    exact ⟨R, sl_1, sl_2, s1, a1, a2, a3⟩
+      exact a1
+
+    unfold is_leftmost_derivation_step
+    exact ⟨R, ⟨sl_1, ⟨sl_2, ⟨s1, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩⟩
 
 
 theorem derivation_step_to_terminal_string_is_rightmost_derivation_step
@@ -546,19 +568,22 @@ theorem derivation_step_to_terminal_string_is_rightmost_derivation_step
   (h2 : ∀ (c : Symbol NTS TS), c ∈ s → c.isTS) :
   is_rightmost_derivation_step G sl s :=
   by
-    simp only [is_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, a1, a2, a3⟩ := h1
-    rw [a3] at h2
+    unfold is_derivation_step at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩ := h1
+
+    rewrite [h1_right_right] at h2
+
     have s1 : ∀ (c : Symbol NTS TS), c ∈ sl_2 → c.isTS :=
     by
-      intro c a4
+      intro c a1
       apply h2 c
-      simp
+      simp only [List.append_assoc, List.mem_append]
       right
       right
-      exact a4
-    simp only [is_rightmost_derivation_step]
-    exact ⟨R, sl_1, sl_2, s1, a1, a2, a3⟩
+      exact a1
+
+    unfold is_rightmost_derivation_step
+    exact ⟨R, ⟨sl_1, ⟨sl_2, ⟨s1, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩⟩
 
 
 theorem exists_nts_imp_exists_leftmost_nts
@@ -574,17 +599,20 @@ theorem exists_nts_imp_exists_leftmost_nts
     sl = sl_1 ++ [Symbol.nts A] ++ sl_2 :=
   by
     obtain s1 := List.exists_mem_imp_exists_leftmost_mem sl (Symbol.isNTS) h1
-    obtain ⟨sl_1, A, sl_2, a1, a2, a3⟩ := s1
-    obtain s2 := symbol_is_nts_imp_exists_nts A a2
-    obtain ⟨x, a4⟩ := s2
+    obtain ⟨sl_1, ⟨A, ⟨sl_2, ⟨s1_left, ⟨s1_right_left, s1_right_right⟩⟩⟩⟩⟩ := s1
+
+    obtain s2 := symbol_is_nts_imp_exists_nts A s1_right_left
+    obtain ⟨x, s2⟩ := s2
     apply Exists.intro sl_1
     apply Exists.intro x
     apply Exists.intro sl_2
     constructor
-    · simp only [symbol_not_nts_iff_is_ts] at a3
-      exact a3
-    · rw [a4] at a1
+    · intro c a1
+      rewrite [← symbol_not_nts_iff_is_ts]
+      apply s1_right_right
       exact a1
+    · rewrite [s2] at s1_left
+      exact s1_left
 
 
 theorem exists_nts_imp_exists_rightmost_nts
@@ -600,17 +628,20 @@ theorem exists_nts_imp_exists_rightmost_nts
     sl = sl_1 ++ [Symbol.nts A] ++ sl_2 :=
   by
     obtain s1 := List.exists_mem_imp_exists_rightmost_mem sl (Symbol.isNTS) h1
-    obtain ⟨sl_1, A, sl_2, a1, a2, a3⟩ := s1
-    obtain s2 := symbol_is_nts_imp_exists_nts A a2
-    obtain ⟨x, a4⟩ := s2
+    obtain ⟨sl_1, ⟨A, ⟨sl_2, ⟨s1_left, ⟨s1_right_left, s1_right_right⟩⟩⟩⟩⟩ := s1
+
+    obtain s2 := symbol_is_nts_imp_exists_nts A s1_right_left
+    obtain ⟨x, s2⟩ := s2
     apply Exists.intro sl_1
     apply Exists.intro x
     apply Exists.intro sl_2
     constructor
-    · simp only [symbol_not_nts_iff_is_ts] at a3
-      exact a3
-    · rw [a4] at a1
+    · intro c a1
+      rewrite [← symbol_not_nts_iff_is_ts]
+      apply s1_right_right
       exact a1
+    · rewrite [s2] at s1_left
+      exact s1_left
 
 
 theorem is_derivation_step_and_is_not_leftmost_derivation_step_aux
@@ -628,11 +659,12 @@ theorem is_derivation_step_and_is_not_leftmost_derivation_step_aux
       lsl = sl_1 ++ [Symbol.nts R.lhs] ++ sl_2 ∧
       rsl = sl_1 ++ R.rhs ++ sl_2 :=
   by
-    simp only [is_derivation_step] at h1
-    obtain ⟨R, sl_1, sl_2, ih_1, ⟨ih_2, ih_3⟩⟩  := h1
+    unfold is_derivation_step at h1
+    simp only [List.append_assoc, List.cons_append, List.nil_append] at h1
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, h1⟩⟩⟩ := h1
 
-    simp only [is_leftmost_derivation_step] at h2
-    simp at h2
+    unfold is_leftmost_derivation_step at h2
+    simp only [List.append_assoc, List.cons_append, List.nil_append, not_exists] at h2
     specialize h2 R sl_1
 
     apply Exists.intro R
@@ -640,11 +672,13 @@ theorem is_derivation_step_and_is_not_leftmost_derivation_step_aux
     apply Exists.intro sl_2
     constructor
     · intro contra
-      simp at ih_2
-      specialize h2 contra ih_1 sl_2 ih_2
-      simp at ih_3
-      contradiction
-    · exact ⟨ih_1, ih_2, ih_3⟩
+      specialize h2 sl_2
+      rewrite [not_and'] at h2
+      apply h2
+      · exact h1
+      · exact contra
+    · simp only [List.append_assoc, List.cons_append, List.nil_append]
+      exact h1
 
 
 theorem is_derivation_step_and_is_not_leftmost_derivation_step
