@@ -1,7 +1,9 @@
 import FormalLanguageLean.RegExp.RegExp
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -30,7 +32,7 @@ instance
   by
     induction RE
     all_goals
-      simp only [RegExp.is_nullable]
+      unfold RegExp.is_nullable
       infer_instance
 
 
@@ -41,25 +43,30 @@ theorem regexp_is_nullable_iff_eps_mem_lang_of
   by
     induction RE
     all_goals
-      simp only [RegExp.is_nullable]
-      simp only [RegExp.LanguageOf]
+      unfold RegExp.is_nullable
+      unfold RegExp.LanguageOf
     case char c =>
-      simp
+      simp only [Set.mem_singleton_iff, List.ne_cons_self]
     case epsilon =>
-      simp
+      simp only [Set.mem_singleton_iff]
     case zero =>
-      simp
+      simp only [Set.mem_empty_iff_false]
     case union R S R_ih S_ih =>
-      rw [R_ih]
-      rw [S_ih]
-      simp
+      simp only [Set.mem_union]
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Iff.refl
     case concat R S R_ih S_ih =>
-      rw [R_ih]
-      rw [S_ih]
-      simp only [Language.eps_mem_concat_iff]
-    case kleene_closure R _ =>
-      simp
-      simp only [Language.eps_mem_kleene_closure]
+      rewrite [Language.eps_mem_concat_iff]
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Iff.refl
+    case kleene_closure R ih =>
+      constructor
+      · intro a1
+        apply Language.eps_mem_kleene_closure
+      · intro a1
+        exact True.intro
 
 
 theorem regexp_is_nullable_iff_regexp_lang_of_is_nullable
@@ -67,8 +74,8 @@ theorem regexp_is_nullable_iff_regexp_lang_of_is_nullable
   (RE : RegExp α) :
   RE.is_nullable ↔ RE.LanguageOf.is_nullable :=
   by
-    simp only [Language.is_nullable]
-    exact regexp_is_nullable_iff_eps_mem_lang_of RE
+    unfold Language.is_nullable
+    apply regexp_is_nullable_iff_eps_mem_lang_of
 
 
 def nullify
@@ -90,28 +97,43 @@ theorem regexp_nullify_lang_eq_regexp_lang_nullify
   by
     induction RE
     case char c =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.nullify]
-      simp
+      unfold RegExp.nullify
+      unfold Language.nullify
+      unfold RegExp.LanguageOf
+      split
+      case isTrue c1 =>
+        simp only [Set.mem_singleton_iff, List.ne_cons_self] at c1
+      case isFalse c1 =>
+        apply Eq.refl
     case epsilon =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.nullify_eps]
+      unfold RegExp.nullify
+      unfold RegExp.LanguageOf
+      rewrite [Language.nullify_eps]
+      apply Eq.refl
     case zero =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.nullify_empty]
+      unfold RegExp.nullify
+      unfold RegExp.LanguageOf
+      rewrite [Language.nullify_empty]
+      apply Eq.refl
     case union R S R_ih S_ih =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.nullify_union]
-      rw [R_ih]
-      rw [S_ih]
+      unfold RegExp.nullify
+      unfold RegExp.LanguageOf
+      rewrite [Language.nullify_union]
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Eq.refl
     case concat R S R_ih S_ih =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.nullify_concat]
-      rw [R_ih]
-      rw [S_ih]
-    case kleene_closure R _ =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.nullify_kleene_closure]
+      unfold RegExp.nullify
+      unfold RegExp.LanguageOf
+      rewrite [Language.nullify_concat]
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Eq.refl
+    case kleene_closure R ih =>
+      unfold RegExp.nullify
+      unfold RegExp.LanguageOf
+      rewrite [Language.nullify_kleene_closure]
+      apply Eq.refl
 
 
 example
@@ -122,15 +144,26 @@ example
   then RE.nullify.LanguageOf = {[]}
   else RE.nullify.LanguageOf = ∅ :=
   by
-    rw [regexp_nullify_lang_eq_regexp_lang_nullify]
-    split_ifs
-    case pos c1 =>
-      simp only [Language.nullify]
-      rw [regexp_is_nullable_iff_eps_mem_lang_of] at c1
-      simp only [c1]
-      simp
-    case neg c1 =>
-      simp only [Language.nullify]
-      rw [regexp_is_nullable_iff_eps_mem_lang_of] at c1
-      simp only [c1]
-      simp
+    rewrite [regexp_nullify_lang_eq_regexp_lang_nullify]
+    split
+    case isTrue c1 =>
+      rewrite [regexp_is_nullable_iff_eps_mem_lang_of] at c1
+
+      unfold Language.nullify
+      split
+      case isTrue c2 =>
+        apply Eq.refl
+      case isFalse c2 =>
+        contradiction
+    case isFalse c1 =>
+      rewrite [regexp_is_nullable_iff_eps_mem_lang_of] at c1
+
+      unfold Language.nullify
+      split
+      case isTrue c2 =>
+        contradiction
+      case isFalse c2 =>
+        apply Eq.refl
+
+
+end RegExp
