@@ -244,7 +244,7 @@ theorem partial_derivative_lang_eq_derivative_lang
       case pos c1 =>
         simp only [regexp_is_nullable_iff_regexp_lang_of_is_nullable] at c1
         simp only [Language.is_nullable_iff_nullify_eq_eps_singleton] at c1
-        rw [c1]
+        rewrite [c1]
         simp only [Language.concat_eps_left]
 
         simp only [Finset.set_biUnion_union]
@@ -252,44 +252,44 @@ theorem partial_derivative_lang_eq_derivative_lang
         · simp only [concat_finset_regexp_regexp]
           split_ifs
           case pos c2 =>
-            rw [c2]
+            rewrite [c2]
             simp only [RegExp.LanguageOf]
             simp only [Language.concat_empty_right]
-            simp
+            simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty]
           case neg c2 =>
-            rw [← R_ih]
-            rw [← Language.concat_distrib_finset_i_union_right]
-            simp
+            rewrite [← R_ih]
+            rewrite [← Language.concat_distrib_finset_i_union_right]
+            simp only [Finset.mem_image, Set.iUnion_exists, Set.biUnion_and', Set.iUnion_iUnion_eq_right]
             simp only [RegExp.LanguageOf]
       case neg c1 =>
         simp only [regexp_is_nullable_iff_regexp_lang_of_is_nullable] at c1
         simp only [Language.not_is_nullable_iff_nullify_eq_empty] at c1
-        rw [c1]
+        rewrite [c1]
         simp only [Language.concat_empty_left]
-        simp
+        simp only [Set.union_empty]
 
         simp only [concat_finset_regexp_regexp]
         split_ifs
         case pos c2 =>
-          rw [c2]
+          rewrite [c2]
           simp only [RegExp.LanguageOf]
           simp only [Language.concat_empty_right]
-          simp
+          simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty]
         case neg c2 =>
-          rw [← R_ih]
-          rw [← Language.concat_distrib_finset_i_union_right]
-          simp
+          rewrite [← R_ih]
+          rewrite [← Language.concat_distrib_finset_i_union_right]
+          simp only [Finset.mem_image, Set.iUnion_exists, Set.biUnion_and', Set.iUnion_iUnion_eq_right]
           simp only [RegExp.LanguageOf]
-
     case kleene_closure R R_ih =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_kleene_closure_wrt_char]
       simp only [RegExp.partial_derivative_wrt_char]
       simp only [concat_finset_regexp_regexp]
-      simp
+      simp?
       simp only [RegExp.LanguageOf]
-      rw [Language.concat_distrib_finset_i_union_right]
-      rw [R_ih]
+      rewrite [Language.concat_distrib_finset_i_union_right]
+      rewrite [R_ih]
+      apply Eq.refl
 
 
 theorem partial_derivative_wrt_char_lang_eq_derivative_lang_wrt_char
@@ -302,7 +302,7 @@ theorem partial_derivative_wrt_char_lang_eq_derivative_lang_wrt_char
     simp only [finset_regexp_language_of]
     simp only [← Language.derivative_distrib_union_of_finset_wrt_str]
     simp only [RegExp.partial_derivative_of_finset_wrt_char]
-    simp
+    simp only [Finset.mem_biUnion, Set.iUnion_exists, Set.biUnion_and']
     sorry
 
 
@@ -319,7 +319,12 @@ theorem partial_derivative_wrt_str_lang_eq_derivative_lang_wrt_str
       simp only [RegExp.partial_derivative_of_finset_wrt_str_aux]
       simp only [Language.derivative_wrt_eps]
     case cons hd tl ih =>
-      simp only [RegExp.partial_derivative_of_finset_wrt_str] at *
+      simp only [RegExp.partial_derivative_of_finset_wrt_str] at ih
+
+      simp only [RegExp.partial_derivative_of_finset_wrt_str]
       simp only [RegExp.partial_derivative_of_finset_wrt_str_aux]
-      rw [Language.derivative_wrt_cons]
+      rewrite [Language.derivative_wrt_cons]
       sorry
+
+
+end RegExp
