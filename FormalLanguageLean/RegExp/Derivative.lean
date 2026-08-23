@@ -1,7 +1,9 @@
 import FormalLanguageLean.RegExp.Nullable
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -43,37 +45,45 @@ theorem regexp_lang_derivative_eq_regexp_derivative_lang
   (RE.derivative a).LanguageOf = Language.derivative RE.LanguageOf [a] :=
   by
     induction RE
+    all_goals
+      unfold RegExp.derivative
     case char c =>
-      simp only [RegExp.derivative]
-      split_ifs
-      case pos c1 =>
-        rw [c1]
-        simp only [RegExp.LanguageOf]
-        simp only [Language.derivative_of_char_wrt_same_char]
-      case neg c1 =>
-        simp only [RegExp.LanguageOf]
-        simp only [Language.derivative_of_char_wrt_diff_char a c c1]
+      split
+      case isTrue c1 =>
+        rewrite [c1]
+        unfold RegExp.LanguageOf
+        rewrite [Language.derivative_of_char_wrt_same_char]
+        apply Eq.refl
+      case isFalse c1 =>
+        unfold RegExp.LanguageOf
+        rewrite [Language.derivative_of_char_wrt_diff_char a c c1]
+        apply Eq.refl
     case epsilon =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.derivative_of_eps_wrt_char]
+      unfold RegExp.LanguageOf
+      rewrite [Language.derivative_of_eps_wrt_char]
+      apply Eq.refl
     case zero =>
-      simp only [RegExp.LanguageOf]
-      simp only [Language.derivative_of_empty_wrt_char]
+      unfold RegExp.LanguageOf
+      rewrite [Language.derivative_of_empty_wrt_char]
+      apply Eq.refl
     case union R S R_ih S_ih =>
-      simp only [RegExp.LanguageOf]
-      rw [R_ih]
-      rw [S_ih]
-      simp only [Language.derivative_of_union_wrt_char]
+      unfold RegExp.LanguageOf
+      rewrite [R_ih]
+      rewrite [S_ih]
+      rewrite [Language.derivative_of_union_wrt_char]
+      apply Eq.refl
     case concat R S R_ih S_ih =>
       simp only [RegExp.LanguageOf]
-      rw [R_ih]
-      rw [S_ih]
-      simp only [Language.derivative_of_concat_wrt_char]
-      simp only [regexp_nullify_lang_eq_regexp_lang_nullify]
-    case kleene_closure R R_ih =>
+      rewrite [R_ih]
+      rewrite [S_ih]
+      rewrite [Language.derivative_of_concat_wrt_char]
+      rewrite [regexp_nullify_lang_eq_regexp_lang_nullify]
+      apply Eq.refl
+    case kleene_closure R ih =>
       simp only [RegExp.LanguageOf]
-      rw [R_ih]
-      simp only [Language.derivative_of_kleene_closure_wrt_char]
+      rewrite [ih]
+      rewrite [Language.derivative_of_kleene_closure_wrt_char]
+      apply Eq.refl
 
 
 theorem regexp_lang_derivative_wrt_str_eq_regexp_derivative_lang
@@ -85,13 +95,14 @@ theorem regexp_lang_derivative_wrt_str_eq_regexp_derivative_lang
   by
     induction s generalizing RE
     case nil =>
-      simp only [RegExp.derivative_wrt_str]
-      simp only [Language.derivative_wrt_eps]
+      rewrite [RegExp.derivative_wrt_str]
+      rewrite [Language.derivative_wrt_eps]
+      apply Eq.refl
     case cons hd tl ih =>
-      simp only [RegExp.derivative_wrt_str]
-      rw [Language.derivative_wrt_cons]
-      simp only [← regexp_lang_derivative_eq_regexp_derivative_lang]
-      exact ih (RE.derivative hd)
+      rewrite [RegExp.derivative_wrt_str]
+      rewrite [Language.derivative_wrt_cons]
+      rewrite [← regexp_lang_derivative_eq_regexp_derivative_lang]
+      apply ih
 
 
 def matches_string
@@ -111,11 +122,8 @@ instance
   Decidable (RE.matches_string s) :=
   by
     induction s generalizing RE
-    case nil =>
-      simp only [RegExp.matches_string]
-      infer_instance
-    case cons hd tl ih =>
-      simp only [RegExp.matches_string]
+    all_goals
+      unfold RegExp.matches_string
       infer_instance
 
 
@@ -133,11 +141,14 @@ example
   by
     induction s generalizing RE
     case nil =>
-      simp only [RegExp.matches_string]
-      exact regexp_is_nullable_iff_eps_mem_lang_of RE
+      unfold RegExp.matches_string
+      apply regexp_is_nullable_iff_eps_mem_lang_of
     case cons hd tl ih =>
-      simp only [RegExp.matches_string]
-      rw [ih]
-      rw [regexp_lang_derivative_eq_regexp_derivative_lang]
-      simp only [Language.derivative]
-      simp
+      unfold RegExp.matches_string
+      rewrite [ih]
+      rewrite [regexp_lang_derivative_eq_regexp_derivative_lang]
+      unfold Language.derivative
+      simp only [List.cons_append, List.nil_append, Set.mem_setOf_eq]
+
+
+end RegExp
