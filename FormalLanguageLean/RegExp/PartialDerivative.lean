@@ -1,7 +1,9 @@
 import FormalLanguageLean.RegExp.Derivative
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -20,7 +22,8 @@ example
   (R.derivative a).LanguageOf = (S.derivative a).LanguageOf :=
   by
     simp only [regexp_lang_derivative_eq_regexp_derivative_lang]
-    simp only [h1]
+    rewrite [h1]
+    apply Eq.refl
 
 
 def finset_regexp_language_of
@@ -47,11 +50,13 @@ theorem regexp_lang_derivative_of_finset_wrt_char_eq_regexp_derivative_of_finset
   (a : α) :
   finset_regexp_language_of (RegExp.derivative_of_finset_wrt_char Γ a) = Language.derivative (finset_regexp_language_of Γ) [a] :=
   by
-    simp only [RegExp.derivative_of_finset_wrt_char]
+    rewrite [RegExp.derivative_of_finset_wrt_char]
     simp only [finset_regexp_language_of]
-    simp
+    simp only [Finset.mem_biUnion, Finset.mem_singleton, Set.iUnion_exists, Set.biUnion_and',
+      Set.iUnion_iUnion_eq_left]
     simp only [regexp_lang_derivative_eq_regexp_derivative_lang]
-    rw [Language.derivative_distrib_union_of_finset_wrt_str]
+    rewrite [Language.derivative_distrib_union_of_finset_wrt_str]
+    apply Eq.refl
 
 
 def derivative_of_finset_wrt_str
@@ -70,11 +75,13 @@ theorem regexp_lang_derivative_of_finset_wrt_str_eq_regexp_derivative_of_finset_
   (s : Str α) :
   finset_regexp_language_of (RegExp.derivative_of_finset_wrt_str Γ s) = Language.derivative (finset_regexp_language_of Γ) s :=
   by
-    simp only [RegExp.derivative_of_finset_wrt_str]
+    rewrite [RegExp.derivative_of_finset_wrt_str]
     simp only [finset_regexp_language_of]
-    simp
+    simp only [Finset.mem_biUnion, Finset.mem_singleton, Set.iUnion_exists, Set.biUnion_and',
+      Set.iUnion_iUnion_eq_left]
     simp only [regexp_lang_derivative_wrt_str_eq_regexp_derivative_lang]
-    rw [Language.derivative_distrib_union_of_finset_wrt_str]
+    rewrite [Language.derivative_distrib_union_of_finset_wrt_str]
+    apply Eq.refl
 
 
 def concat_finset_regexp_regexp
@@ -154,12 +161,12 @@ theorem partial_derivative_wrt_str_aux_last
   by
     induction s generalizing Γ
     case nil =>
-      simp
+      simp only [List.nil_append]
       simp only [RegExp.partial_derivative_of_finset_wrt_str_aux]
     case cons hd tl ih =>
-      simp
+      simp only [List.cons_append]
       simp only [RegExp.partial_derivative_of_finset_wrt_str_aux]
-      exact ih (RegExp.partial_derivative_of_finset_wrt_char Γ hd)
+      apply ih
 
 
 theorem partial_derivative_wrt_str_last
@@ -172,7 +179,7 @@ theorem partial_derivative_wrt_str_last
     RegExp.partial_derivative_of_finset_wrt_char (RegExp.partial_derivative_wrt_str RE s) a :=
   by
     simp only [RegExp.partial_derivative_wrt_str]
-    exact partial_derivative_wrt_str_aux_last {RE} s a
+    apply partial_derivative_wrt_str_aux_last
 
 
 theorem partial_derivative_lang_eq_derivative_lang
@@ -187,38 +194,47 @@ theorem partial_derivative_lang_eq_derivative_lang
     case char b =>
       simp only [Language.derivative]
       ext cs
-      simp
-      simp only [RegExp.partial_derivative_wrt_char]
-      split_ifs
-      case pos c1 =>
-        simp
+      simp only [Set.mem_iUnion, exists_prop, List.cons_append, List.nil_append, Set.mem_setOf_eq]
+      unfold RegExp.partial_derivative_wrt_char
+      split
+      case isTrue c1 =>
+        simp only [Finset.mem_singleton, exists_eq_left]
+        unfold RegExp.LanguageOf
+        simp only [Set.mem_singleton_iff, List.cons.injEq]
+        constructor
+        · intro a1
+          exact ⟨c1, a1⟩
+        · intro a1
+          obtain ⟨a1_left, a1_right⟩ := a1
+          exact a1_right
+      case isFalse c1 =>
         simp only [RegExp.LanguageOf]
-        simp
-        intro _
-        exact c1
-      case neg c1 =>
-        simp
-        simp only [RegExp.LanguageOf]
-        simp
-        intro a1
-        contradiction
+        constructor
+        · intro a1
+          obtain ⟨i, ⟨a1_left, a1_right⟩⟩ := a1
+          simp only [Finset.notMem_empty] at a1_left
+        · intro a1
+          simp only [Set.mem_singleton_iff, List.cons.injEq] at a1
+          obtain ⟨a1_left, a1_right⟩ := a1
+          contradiction
     case epsilon =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_eps_wrt_char]
-      simp only [RegExp.partial_derivative_wrt_char]
-      simp
+      unfold RegExp.partial_derivative_wrt_char
+      simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty]
     case zero =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_empty_wrt_char]
-      simp only [RegExp.partial_derivative_wrt_char]
-      simp
+      unfold RegExp.partial_derivative_wrt_char
+      simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty]
     case union R S R_ih S_ih =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_union_wrt_char]
-      simp only [RegExp.partial_derivative_wrt_char]
+      unfold RegExp.partial_derivative_wrt_char
       simp only [Finset.set_biUnion_union]
-      rw [R_ih]
-      rw [S_ih]
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Eq.refl
     case concat R S R_ih S_ih =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_concat_wrt_char]
