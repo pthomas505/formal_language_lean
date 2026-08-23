@@ -136,6 +136,40 @@ theorem regexp_nullify_lang_eq_regexp_lang_nullify
       apply Eq.refl
 
 
+theorem regexp_is_nullable_imp_regexp_lang_nullify_eq_eps
+  {α : Type}
+  [DecidableEq α]
+  (RE : RegExp α)
+  (h1 : RE.is_nullable) :
+  RE.LanguageOf.nullify = {[]} :=
+  by
+    rewrite [regexp_is_nullable_iff_eps_mem_lang_of] at h1
+
+    unfold Language.nullify
+    split
+    case isTrue c1 =>
+      apply Eq.refl
+    case isFalse c1 =>
+      contradiction
+
+
+theorem not_regexp_is_nullable_imp_regexp_lang_nullify_eq_empty
+  {α : Type}
+  [DecidableEq α]
+  (RE : RegExp α)
+  (h1 : ¬ RE.is_nullable) :
+  RE.LanguageOf.nullify = ∅ :=
+  by
+    rewrite [regexp_is_nullable_iff_eps_mem_lang_of] at h1
+
+    unfold Language.nullify
+    split
+    case isTrue c1 =>
+      contradiction
+    case isFalse c1 =>
+      apply Eq.refl
+
+
 example
   {α : Type}
   [DecidableEq α]
@@ -147,23 +181,11 @@ example
     rewrite [regexp_nullify_lang_eq_regexp_lang_nullify]
     split
     case isTrue c1 =>
-      rewrite [regexp_is_nullable_iff_eps_mem_lang_of] at c1
-
-      unfold Language.nullify
-      split
-      case isTrue c2 =>
-        apply Eq.refl
-      case isFalse c2 =>
-        contradiction
+      apply regexp_is_nullable_imp_regexp_lang_nullify_eq_eps
+      exact c1
     case isFalse c1 =>
-      rewrite [regexp_is_nullable_iff_eps_mem_lang_of] at c1
-
-      unfold Language.nullify
-      split
-      case isTrue c2 =>
-        contradiction
-      case isFalse c2 =>
-        apply Eq.refl
+      apply not_regexp_is_nullable_imp_regexp_lang_nullify_eq_empty
+      exact c1
 
 
 end RegExp

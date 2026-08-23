@@ -238,48 +238,139 @@ theorem partial_derivative_lang_eq_derivative_lang
     case concat R S R_ih S_ih =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_concat_wrt_char]
-      simp only [RegExp.partial_derivative_wrt_char]
 
-      split_ifs
-      case pos c1 =>
-        simp only [regexp_is_nullable_iff_regexp_lang_of_is_nullable] at c1
-        simp only [Language.is_nullable_iff_nullify_eq_eps_singleton] at c1
-        rewrite [c1]
-        simp only [Language.concat_eps_left]
+      ext cs
 
-        simp only [Finset.set_biUnion_union]
-        congr
-        · simp only [concat_finset_regexp_regexp]
-          split_ifs
-          case pos c2 =>
-            rewrite [c2]
-            simp only [RegExp.LanguageOf]
-            simp only [Language.concat_empty_right]
-            simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty]
-          case neg c2 =>
-            rewrite [← R_ih]
-            rewrite [← Language.concat_distrib_finset_i_union_right]
-            simp only [Finset.mem_image, Set.iUnion_exists, Set.biUnion_and', Set.iUnion_iUnion_eq_right]
-            simp only [RegExp.LanguageOf]
-      case neg c1 =>
-        simp only [regexp_is_nullable_iff_regexp_lang_of_is_nullable] at c1
-        simp only [Language.not_is_nullable_iff_nullify_eq_empty] at c1
-        rewrite [c1]
-        simp only [Language.concat_empty_left]
-        simp only [Set.union_empty]
+      simp only [Set.mem_iUnion, exists_prop, Set.mem_union]
+      rewrite [← R_ih]
+      rewrite [← S_ih]
+      rewrite [← Language.concat_distrib_finset_i_union_right]
+      simp only [Set.mem_iUnion, exists_prop]
 
-        simp only [concat_finset_regexp_regexp]
-        split_ifs
-        case pos c2 =>
-          rewrite [c2]
-          simp only [RegExp.LanguageOf]
-          simp only [Language.concat_empty_right]
-          simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty]
-        case neg c2 =>
-          rewrite [← R_ih]
-          rewrite [← Language.concat_distrib_finset_i_union_right]
-          simp only [Finset.mem_image, Set.iUnion_exists, Set.biUnion_and', Set.iUnion_iUnion_eq_right]
-          simp only [RegExp.LanguageOf]
+      constructor
+      · intro a1
+        obtain ⟨i, ⟨a1_left, a1_right⟩⟩ := a1
+
+        simp only [RegExp.partial_derivative_wrt_char] at a1_left
+        unfold concat_finset_regexp_regexp at a1_left
+
+        split at a1_left
+        case isTrue c1 =>
+          simp only [regexp_is_nullable_iff_regexp_lang_of_is_nullable] at c1
+          simp only [Language.is_nullable_iff_nullify_eq_eps_singleton] at c1
+          rewrite [c1]
+          simp only [Language.concat_eps_left]
+
+          simp only [Finset.mem_union] at a1_left
+          cases a1_left
+          case inl a1_left =>
+            split at a1_left
+            case isTrue c2 =>
+              simp only [Finset.mem_image] at a1_left
+              obtain ⟨j, ⟨a1_left_left, a1_left_right⟩⟩ := a1_left
+              rewrite [← a1_left_right] at a1_right
+              unfold LanguageOf at a1_right
+              left
+              apply Exists.intro j
+              exact ⟨a1_left_left, a1_right⟩
+            case isFalse c2 =>
+              simp only [Finset.notMem_empty] at a1_left
+          case inr a1_left =>
+            right
+            simp only [Set.mem_iUnion, exists_prop]
+            apply Exists.intro i
+            exact ⟨a1_left, a1_right⟩
+        case isFalse c1 =>
+          split at a1_left
+          case isTrue c2 =>
+            simp only [Finset.mem_image] at a1_left
+            obtain ⟨j, ⟨a1_left_left, a1_left_right⟩⟩ := a1_left
+            rewrite [← a1_left_right] at a1_right
+            unfold LanguageOf at a1_right
+
+            left
+            apply Exists.intro j
+            exact ⟨a1_left_left, a1_right⟩
+          case isFalse c2 =>
+            simp only [Finset.notMem_empty] at a1_left
+      · intro a1
+        simp only [RegExp.partial_derivative_wrt_char]
+        unfold concat_finset_regexp_regexp
+
+        cases a1
+        case inl a1 =>
+          obtain ⟨i, ⟨a1_left, a1_right⟩⟩ := a1
+
+          split
+          case isTrue c1 =>
+            simp only [Finset.mem_union]
+            split
+            case isTrue c2 =>
+              simp only [Finset.mem_image]
+              apply Exists.intro (i.concat S)
+              constructor
+              · left
+                apply Exists.intro i
+                constructor
+                · exact a1_left
+                · apply Eq.refl
+              · unfold LanguageOf
+                exact a1_right
+            case isFalse c2 =>
+              simp only [Decidable.not_not] at c2
+              rewrite [c2] at a1_right
+              simp only [LanguageOf] at a1_right
+              simp only [Language.concat_empty_right] at a1_right
+              simp only [Set.mem_empty_iff_false] at a1_right
+          case isFalse c1 =>
+            split
+            case isTrue c2 =>
+              simp only [Finset.mem_image]
+              apply Exists.intro (i.concat S)
+              constructor
+              · apply Exists.intro i
+                constructor
+                · exact a1_left
+                · apply Eq.refl
+              · unfold LanguageOf
+                exact a1_right
+            case isFalse c2 =>
+              simp only [Decidable.not_not] at c2
+              rewrite [c2] at a1_right
+              simp only [LanguageOf] at a1_right
+              simp only [Language.concat_empty_right] at a1_right
+              simp only [Set.mem_empty_iff_false] at a1_right
+        case inr a1 =>
+          split
+          case isTrue c1 =>
+            simp only [regexp_is_nullable_iff_regexp_lang_of_is_nullable] at c1
+            simp only [Language.is_nullable_iff_nullify_eq_eps_singleton] at c1
+            rewrite [c1] at a1
+            simp only [Language.concat_eps_left] at a1
+            simp only [Set.mem_iUnion, exists_prop] at a1
+            obtain ⟨i, ⟨a1_left, a1_right⟩⟩ := a1
+
+            simp only [Finset.mem_union]
+
+            split
+            case isTrue c2 =>
+              simp only [Finset.mem_image]
+              apply Exists.intro i
+              constructor
+              · right
+                exact a1_left
+              · exact a1_right
+            case isFalse c2 =>
+              apply Exists.intro i
+              constructor
+              · right
+                exact a1_left
+              · exact a1_right
+          case isFalse c1 =>
+            obtain s1 := not_regexp_is_nullable_imp_regexp_lang_nullify_eq_empty R c1
+            rewrite [s1] at a1
+            simp only [Language.concat_empty_left] at a1
+            simp only [Set.mem_empty_iff_false] at a1
     case kleene_closure R R_ih =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_kleene_closure_wrt_char]
