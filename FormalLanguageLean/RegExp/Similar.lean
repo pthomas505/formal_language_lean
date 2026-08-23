@@ -1,7 +1,9 @@
 import FormalLanguageLean.RegExp.Derivative
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -72,42 +74,42 @@ example
     induction h1
     case union_1 R =>
       simp only [RegExp.LanguageOf]
-      simp
+      simp only [Set.union_self]
     case union_2 R S =>
-      simp only [RegExp.LanguageOf]
-      exact Set.union_comm R.LanguageOf S.LanguageOf
+      unfold RegExp.LanguageOf
+      apply Set.union_comm
     case union_3 R S T =>
-      simp only [RegExp.LanguageOf]
-      exact Set.union_assoc R.LanguageOf S.LanguageOf T.LanguageOf
+      unfold RegExp.LanguageOf
+      apply Set.union_assoc
     case union_4 R =>
       simp only [RegExp.LanguageOf]
-      exact Set.empty_union R.LanguageOf
+      apply Set.empty_union
     case concat_1 R S T =>
-      simp only [RegExp.LanguageOf]
-      symm
-      exact Language.concat_assoc R.LanguageOf S.LanguageOf T.LanguageOf
+      unfold RegExp.LanguageOf
+      apply Eq.symm
+      apply Language.concat_assoc
     case concat_2 R =>
-      simp only [RegExp.LanguageOf]
-      exact Language.concat_empty_left R.LanguageOf
+      unfold RegExp.LanguageOf
+      apply Language.concat_empty_left
     case concat_3 R =>
-      simp only [RegExp.LanguageOf]
-      exact Language.concat_empty_right R.LanguageOf
+      unfold RegExp.LanguageOf
+      apply Language.concat_empty_right
     case concat_4 R =>
       simp only [RegExp.LanguageOf]
-      exact Language.concat_eps_left R.LanguageOf
+      apply Language.concat_eps_left
     case concat_5 R =>
       simp only [RegExp.LanguageOf]
-      exact Language.concat_eps_right R.LanguageOf
+      apply Language.concat_eps_right
     case kleene_closure_1 R =>
-      simp only [RegExp.LanguageOf]
-      symm
-      exact Language.kleene_closure_idempotent R.LanguageOf
+      unfold RegExp.LanguageOf
+      apply Eq.symm
+      apply Language.kleene_closure_idempotent
     case kleene_closure_2 =>
-      simp only [RegExp.LanguageOf]
-      exact Language.kleene_closure_eps
+      unfold RegExp.LanguageOf
+      apply Language.kleene_closure_eps
     case kleene_closure_3 =>
-      simp only [RegExp.LanguageOf]
-      exact Language.kleene_closure_empty
+      unfold RegExp.LanguageOf
+      apply Language.kleene_closure_empty
 
 
 def simp_union
@@ -127,19 +129,19 @@ theorem simp_union_lang_eq_union_lang
   (RE_1 RE_2 : RegExp α) :
   (simp_union RE_1 RE_2).LanguageOf = (RegExp.union RE_1 RE_2).LanguageOf :=
   by
-    simp only [simp_union]
-
     induction RE_1 generalizing RE_2
     case zero =>
+      simp only [simp_union]
       simp only [RegExp.LanguageOf]
-      simp
+      simp only [Set.empty_union]
     all_goals
       cases RE_2
       case zero =>
+        simp only [simp_union]
         simp only [RegExp.LanguageOf]
-        simp
+        simp only [Set.union_empty]
       all_goals
-        rfl
+        simp only [simp_union]
 
 
 def simp_concat
@@ -161,25 +163,31 @@ theorem simp_concat_lang_eq_concat_lang
   (RE_1 RE_2 : RegExp α) :
   (simp_concat RE_1 RE_2).LanguageOf = (RegExp.concat RE_1 RE_2).LanguageOf :=
   by
-    simp only [simp_concat]
-
     induction RE_1 generalizing RE_2
     case epsilon =>
+      simp only [simp_concat]
       simp only [RegExp.LanguageOf]
-      simp only [Language.concat_eps_left]
+      rewrite [Language.concat_eps_left]
+      apply Eq.refl
     case zero =>
+      simp only [simp_concat]
       simp only [RegExp.LanguageOf]
-      simp only [Language.concat_empty_left]
+      rewrite [Language.concat_empty_left]
+      apply Eq.refl
     all_goals
       cases RE_2
       case epsilon =>
+        simp only [simp_concat]
         simp only [RegExp.LanguageOf]
-        simp only [Language.concat_eps_right]
+        rewrite [Language.concat_eps_right]
+        apply Eq.refl
       case zero =>
+        simp only [simp_concat]
         simp only [RegExp.LanguageOf]
-        simp only [Language.concat_empty_right]
+        rewrite [Language.concat_empty_right]
+        apply Eq.refl
       all_goals
-        rfl
+        simp only [simp_concat]
 
 
 def simp_kleene_closure
@@ -200,20 +208,25 @@ theorem simp_kleene_closure_lang_eq_kleene_closure_lang
   by
     induction RE
     case epsilon =>
+      unfold simp_kleene_closure
       simp only [RegExp.LanguageOf]
-      simp only [Language.kleene_closure_eps]
+      rewrite [Language.kleene_closure_eps]
+      apply Eq.refl
     case zero =>
+      unfold simp_kleene_closure
       simp only [RegExp.LanguageOf]
-      simp only [Language.kleene_closure_empty]
+      rewrite [Language.kleene_closure_empty]
+      apply Eq.refl
     case kleene_closure R R_ih =>
       simp only [RegExp.LanguageOf] at R_ih
 
-      simp only [simp_kleene_closure]
+      unfold simp_kleene_closure
       simp only [RegExp.LanguageOf]
-      rw [← Language.kleene_closure_idempotent]
+      rewrite [← Language.kleene_closure_idempotent]
       exact R_ih
     all_goals
-      rfl
+      unfold simp_kleene_closure
+      apply Eq.refl
 
 
 def simp_derivative
@@ -240,31 +253,36 @@ theorem simp_derivative_lang_eq_derivative_lang
   by
     induction RE
     case union R S R_ih S_ih =>
-      simp only [RegExp.simp_derivative]
-      simp only [RegExp.derivative]
-      simp only [simp_union_lang_eq_union_lang]
-      simp only [RegExp.LanguageOf]
-      rw [R_ih]
-      rw [S_ih]
+      unfold RegExp.simp_derivative
+      unfold RegExp.derivative
+      rewrite [simp_union_lang_eq_union_lang]
+      unfold RegExp.LanguageOf
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Eq.refl
     case concat R S R_ih S_ih =>
-      simp only [RegExp.simp_derivative]
-      simp only [RegExp.derivative]
-      simp only [simp_union_lang_eq_union_lang]
-      simp only [RegExp.LanguageOf]
+      unfold RegExp.simp_derivative
+      unfold RegExp.derivative
+      rewrite [simp_union_lang_eq_union_lang]
+      unfold RegExp.LanguageOf
       simp only [simp_concat_lang_eq_concat_lang]
       simp only [RegExp.LanguageOf]
-      rw [R_ih]
-      rw [S_ih]
-    case kleene_closure R R_ih =>
-      simp only [RegExp.simp_derivative]
-      simp only [RegExp.derivative]
-      simp only [simp_concat_lang_eq_concat_lang]
+      rewrite [R_ih]
+      rewrite [S_ih]
+      apply Eq.refl
+    case kleene_closure R ih =>
+      unfold RegExp.simp_derivative
+      unfold RegExp.derivative
+      rewrite [simp_concat_lang_eq_concat_lang]
+      unfold RegExp.LanguageOf
+      rewrite [simp_kleene_closure_lang_eq_kleene_closure_lang]
       simp only [RegExp.LanguageOf]
-      simp only [simp_kleene_closure_lang_eq_kleene_closure_lang]
-      simp only [RegExp.LanguageOf]
-      rw [R_ih]
+      rewrite [ih]
+      apply Eq.refl
     all_goals
-      rfl
+      unfold simp_derivative
+      unfold derivative
+      apply Eq.refl
 
 
 theorem all_simp_derivative_mem_finset
@@ -275,59 +293,60 @@ theorem all_simp_derivative_mem_finset
   by
     induction RE
     case char c =>
-      simp only [simp_derivative]
+      unfold simp_derivative
       apply Exists.intro {epsilon, zero}
       intro a
-      split_ifs
-      case pos =>
-        simp
-      case neg =>
-        simp
+      split
+      case isTrue c1 =>
+        simp only [Finset.mem_insert]
+        left
+        exact True.intro
+      case isFalse c1 =>
+        simp only [Finset.mem_insert, reduceCtorEq, Finset.mem_singleton]
+        right
+        exact True.intro
     case epsilon =>
-      simp only [simp_derivative]
+      unfold simp_derivative
       apply Exists.intro {zero}
       intro a
-      simp
+      simp only [Finset.mem_singleton]
     case zero =>
-      simp only [simp_derivative]
+      unfold simp_derivative
       apply Exists.intro {zero}
       intro a
-      simp
+      simp only [Finset.mem_singleton]
     case union R S R_ih S_ih =>
       obtain ⟨T_R, T_R_ih⟩ := R_ih
       obtain ⟨T_S, T_S_ih⟩ := S_ih
-      simp only [simp_derivative]
-      simp only [simp_union]
+
       apply Exists.intro (T_R.biUnion (fun a => T_S.biUnion (fun b => {simp_union a b})))
       intro a
       by_cases c1 : R.simp_derivative a = zero
-      case pos =>
-        simp only [c1]
-        simp
+      · simp only [simp_derivative]
+        rewrite [c1]
+        simp only [Finset.mem_biUnion, Finset.mem_singleton]
         apply Exists.intro (R.simp_derivative a)
         constructor
-        · exact T_R_ih a
+        · apply T_R_ih
         · apply Exists.intro (S.simp_derivative a)
           constructor
-          · exact T_S_ih a
-          · simp only [c1]
-            simp only [simp_union]
-      case neg =>
-        simp only [c1]
-        simp
+          · apply T_S_ih
+          · rewrite [c1]
+            apply Eq.refl
+      · simp only [simp_derivative]
+        simp only [Finset.mem_biUnion, Finset.mem_singleton]
         apply Exists.intro (R.simp_derivative a)
         constructor
-        · exact T_R_ih a
+        · apply T_R_ih
         · apply Exists.intro (S.simp_derivative a)
           constructor
-          · exact T_S_ih a
+          · apply T_S_ih
           · by_cases c2 : S.simp_derivative a = zero
-            case pos =>
-              simp only [c2]
-              simp only [simp_union]
+            · simp only [c2]
             case neg =>
-              simp only [c2]
-              simp only [simp_union]
-
+              apply Eq.refl
     all_goals
       sorry
+
+
+end RegExp
