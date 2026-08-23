@@ -1,7 +1,9 @@
 import FormalLanguageLean.RegExp.Similar
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://people.cs.uchicago.edu/~jhr/papers/2009/jfp-re-derivatives.pdf
@@ -27,3 +29,6 @@ def goto
     let Q' := Q ∪ {q_c}
     let δ' := δ ∪ {(q, c, q_c)}
     Sigma.foldl (goto Sigma q_c) (Q', δ')
+
+
+end RegExp
