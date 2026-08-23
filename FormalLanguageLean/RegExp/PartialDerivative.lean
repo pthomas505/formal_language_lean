@@ -371,16 +371,53 @@ theorem partial_derivative_lang_eq_derivative_lang
             rewrite [s1] at a1
             simp only [Language.concat_empty_left] at a1
             simp only [Set.mem_empty_iff_false] at a1
-    case kleene_closure R R_ih =>
+    case kleene_closure R ih =>
       simp only [RegExp.LanguageOf]
       simp only [Language.derivative_of_kleene_closure_wrt_char]
       simp only [RegExp.partial_derivative_wrt_char]
       simp only [concat_finset_regexp_regexp]
-      simp?
-      simp only [RegExp.LanguageOf]
-      rewrite [Language.concat_distrib_finset_i_union_right]
-      rewrite [R_ih]
-      apply Eq.refl
+
+      ext cs
+      constructor
+      · intro a1
+        simp only [Set.mem_iUnion, exists_prop] at a1
+        obtain ⟨i, ⟨a1_left, a1_right⟩⟩ := a1
+        split at a1_left
+        case isTrue c1 =>
+          simp only [Finset.mem_image] at a1_left
+          obtain ⟨j, ⟨a1_left_left, a1_left_right⟩⟩ := a1_left
+          rewrite [← a1_left_right] at a1_right
+          clear a1_left_right
+          rewrite[← ih]
+          rewrite [← Language.concat_distrib_finset_i_union_right]
+          simp only [Set.mem_iUnion, exists_prop]
+          apply Exists.intro j
+          constructor
+          · exact a1_left_left
+          · simp only [LanguageOf] at a1_right
+            exact a1_right
+        case isFalse c1 =>
+          simp only [Finset.notMem_empty] at a1_left
+      · intro a1
+        simp only [Set.mem_iUnion, exists_prop]
+        split
+        case isTrue c1 =>
+          simp only [Finset.mem_image]
+          rewrite [← ih] at a1
+          rewrite [← Language.concat_distrib_finset_i_union_right] at a1
+          simp only [Set.mem_iUnion, exists_prop] at a1
+          obtain ⟨i, ⟨a1_left, a1_right⟩⟩ := a1
+          apply Exists.intro (i.concat R.kleene_closure)
+          constructor
+          · apply Exists.intro i
+            constructor
+            · exact a1_left
+            · apply Eq.refl
+          · simp only [LanguageOf]
+            exact a1_right
+        case isFalse c1 =>
+          simp only [Decidable.not_not] at c1
+          contradiction
 
 
 theorem partial_derivative_wrt_char_lang_eq_derivative_lang_wrt_char
