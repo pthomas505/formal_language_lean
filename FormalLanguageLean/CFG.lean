@@ -697,17 +697,19 @@ theorem is_derivation_step_and_is_not_leftmost_derivation_step
     rsl = sl_1 ++ [Symbol.nts A] ++ sl_2 ++ sl_3 ++ sl_4 :=
   by
     obtain s1 := is_derivation_step_and_is_not_leftmost_derivation_step_aux G lsl rsl h1 h2
-    obtain ⟨R, sl_1, sl_2, a1, a2, a3, a4⟩ := s1
-    rw [a3]
-    rw [a4]
+    obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨s1_left, ⟨s1_right_left, ⟨s1_right_right_left, s1_right_right_right⟩⟩⟩⟩⟩⟩ := s1
+    rewrite [s1_right_right_left]
+    rewrite [s1_right_right_right]
 
-    simp at a1
-    simp only [symbol_not_ts_iff_is_nts] at a1
-    obtain s2 := exists_nts_imp_exists_leftmost_nts sl_1 a1
-    obtain ⟨sl_3, A, sl_4, ⟨a5, a6⟩⟩ := s2
-    rw [a6]
+    simp only [not_forall] at s1_left
+    simp only [exists_prop] at s1_left
+    simp only [symbol_not_ts_iff_is_nts] at s1_left
 
-    exact ⟨sl_3, sl_4, R.rhs, sl_2, A, R.lhs, a5, a2, rfl, rfl⟩
+    obtain s2 := exists_nts_imp_exists_leftmost_nts sl_1 s1_left
+    obtain ⟨sl_3, A, sl_4, ⟨s2_left, s2_right⟩⟩ := s2
+    rewrite [s2_right]
+
+    exact ⟨sl_3, ⟨sl_4, ⟨R.rhs, ⟨sl_2, ⟨A, ⟨R.lhs, ⟨s2_left, ⟨s1_right_left, ⟨rfl, rfl⟩⟩⟩⟩⟩⟩⟩⟩⟩
 
 
 theorem extracted_1
@@ -737,17 +739,17 @@ example
   Relation.TransGen (is_leftmost_derivation_step G) lsl w :=
   by
     induction h1 using Relation.TransGen.head_induction_on
-    case base sl ih =>
+    case single sl ih =>
       apply Relation.TransGen.single
-      exact derivation_step_to_terminal_string_is_leftmost_derivation_step G sl w ih h2
-    case ih alpha alpha_1 ih_1 ih_2 ih_3 =>
+      apply derivation_step_to_terminal_string_is_leftmost_derivation_step
+      · exact ih
+      · exact h2
+    case head alpha alpha_1 ih_1 ih_2 ih_3 =>
       by_cases c1 : is_leftmost_derivation_step G alpha alpha_1
-      case pos =>
-        apply Relation.TransGen.trans
+      · apply Relation.TransGen.trans
         · exact Relation.TransGen.single c1
         · exact ih_3
-      case neg =>
-        obtain s1 := is_derivation_step_and_is_not_leftmost_derivation_step G alpha alpha_1 ih_1 c1
-        obtain ⟨u, mu, delta, rho, A, B, a1, a2, a3, a4⟩ := s1
+      · obtain s1 := is_derivation_step_and_is_not_leftmost_derivation_step G alpha alpha_1 ih_1 c1
+        obtain ⟨u, ⟨mu, ⟨delta, ⟨rho, ⟨A, ⟨B, ⟨s1_left, ⟨s1_right_left, ⟨s1_right_right_left, s1_right_right_right⟩⟩⟩⟩⟩⟩⟩⟩⟩ := s1
 
         sorry
