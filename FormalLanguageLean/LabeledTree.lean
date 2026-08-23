@@ -1,7 +1,9 @@
 import Mathlib.Data.Finset.Basic
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 inductive LabeledTree (α : Type) : Type
@@ -55,9 +57,9 @@ def LabeledTree.isLeaf
 
 instance (α : Type) (T : LabeledTree α) : Decidable (isLeaf T) :=
   by
-  induction T
-  simp only [isLeaf]
-  infer_instance
+    induction T
+    unfold isLeaf
+    infer_instance
 
 
 /--
