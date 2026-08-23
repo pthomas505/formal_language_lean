@@ -1,7 +1,9 @@
 import FormalLanguageLean.Regular
 
 
-set_option autoImplicit false
+set_option linter.style.docString false
+set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 
 -- https://arxiv.org/pdf/1907.13577
@@ -41,20 +43,28 @@ example
   by
     induction RE
     case char c =>
-      simp only [RegExp.LanguageOf]
+      unfold RegExp.LanguageOf
       exact Language.IsRegLang.char c
     case epsilon =>
-      simp only [RegExp.LanguageOf]
+      unfold RegExp.LanguageOf
       exact Language.IsRegLang.epsilon
     case zero =>
-      simp only [RegExp.LanguageOf]
+      unfold RegExp.LanguageOf
       exact Language.IsRegLang.zero
     case union R S R_ih S_ih =>
-      simp only [RegExp.LanguageOf]
-      exact Language.IsRegLang.union R.LanguageOf S.LanguageOf R_ih S_ih
+      unfold RegExp.LanguageOf
+      apply Language.IsRegLang.union
+      · exact R_ih
+      · exact S_ih
     case concat R S R_ih S_ih =>
-      simp only [RegExp.LanguageOf]
-      exact Language.IsRegLang.concat R.LanguageOf S.LanguageOf R_ih S_ih
-    case kleene_closure R R_ih =>
-      simp only [RegExp.LanguageOf]
-      exact Language.IsRegLang.kleene_closure R.LanguageOf R_ih
+      unfold RegExp.LanguageOf
+      apply Language.IsRegLang.concat
+      · exact R_ih
+      · exact S_ih
+    case kleene_closure R ih =>
+      unfold RegExp.LanguageOf
+      apply Language.IsRegLang.kleene_closure
+      exact ih
+
+
+end RegExp
