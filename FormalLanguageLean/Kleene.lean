@@ -314,15 +314,15 @@ theorem kleene_closure_subset_kleene_closure_set
         simp only [List.not_mem_nil] at a2
       · simp only [List.flatten_nil]
     case succ s t ih_1 ih_2 ih_3 =>
-      obtain ⟨M, a2, a3⟩ := ih_3
-      rewrite [a3]
+      obtain ⟨M, ⟨ih_3_left, ih_3_right⟩⟩ := ih_3
+      rewrite [ih_3_right]
       apply Exists.intro (M ++ [t])
       constructor
       · intro r a4
         simp only [List.mem_append, List.mem_cons] at a4
         cases a4
         case inl a4 =>
-          apply a2
+          apply ih_3_left
           exact a4
         case inr a4 =>
           cases a4
@@ -440,13 +440,13 @@ theorem concat_kleene_closure_succ_left
       · exact ht
     · intro a1
       simp only [Set.mem_iUnion] at a1
-      obtain ⟨i, a2⟩ := a1
+      obtain ⟨i, a1⟩ := a1
 
-      unfold exp at a2
-      rewrite [concat_exp_comm] at a2
-      unfold concat at a2
-      simp only [Set.mem_setOf_eq] at a2
-      obtain ⟨s, hs, t, ht, eq⟩ := a2
+      unfold exp at a1
+      rewrite [concat_exp_comm] at a1
+      unfold concat at a1
+      simp only [Set.mem_setOf_eq] at a1
+      obtain ⟨s, hs, t, ht, eq⟩ := a1
 
       unfold concat
       simp only [Set.mem_iUnion, Set.mem_setOf_eq]
@@ -474,12 +474,12 @@ theorem concat_kleene_closure_succ_right
       · exact ht
     · intro a1
       simp only [Set.mem_iUnion] at a1
-      obtain ⟨i, a2⟩ := a1
+      obtain ⟨i, a1⟩ := a1
 
-      unfold exp at a2
-      unfold concat at a2
-      simp only [Set.mem_setOf_eq] at a2
-      obtain ⟨s, hs, t, ht, eq⟩ := a2
+      unfold exp at a1
+      unfold concat at a1
+      simp only [Set.mem_setOf_eq] at a1
+      obtain ⟨s, hs, t, ht, eq⟩ := a1
 
       unfold concat
       simp only [Set.mem_iUnion, Set.mem_setOf_eq]

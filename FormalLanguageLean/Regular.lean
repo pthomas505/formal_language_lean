@@ -340,7 +340,7 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
         · rewrite [s3]
           simp only [Set.Finite.coe_toFinset]
 
-      obtain ⟨S, a2⟩ := s4
+      obtain ⟨S, s4⟩ := s4
 
       let A := {kleene_closure α L1} ∪ S.biUnion (fun (M : Language α) => {concat M (kleene_closure α L1)})
 
@@ -363,12 +363,12 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
           ext cs
           simp only [Set.mem_iUnion, Set.mem_setOf_eq, exists_prop]
           constructor
-          · intro a3
-            obtain ⟨i, hi, s, hs, t, ht, eq⟩ := a3
+          · intro a2
+            obtain ⟨i, hi, s, hs, t, ht, eq⟩ := a2
             rewrite [← eq]
             exact ⟨s, ⟨i, hi, hs⟩, t, ht, rfl⟩
-          · intro a3
-            obtain ⟨s, ⟨i, hi, hs⟩, t, ht, eq⟩ := a3
+          · intro a2
+            obtain ⟨s, ⟨i, hi, hs⟩, t, ht, eq⟩ := a2
             rewrite [← eq]
             exact ⟨i, hi, s, hs, t, ht, rfl⟩
         rewrite [s2]
@@ -379,7 +379,7 @@ theorem all_derivative_of_reg_lang_wrt_str_mem_finset
         right
         apply Exists.intro (⋃ t ∈ foo' L1 s, derivative L1 t)
         constructor
-        · apply a2
+        · apply s4
         · apply Eq.refl
 
 

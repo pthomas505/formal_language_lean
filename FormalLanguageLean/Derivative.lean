@@ -425,7 +425,7 @@ theorem concat_derivative_and_nullify_wrt_str
         · exact hL1
         · apply Exists.intro []
           rewrite [← eq]
-          rw [ht]
+          rewrite [ht]
           constructor
           · exact ⟨hL2, rfl⟩
           · apply Eq.refl

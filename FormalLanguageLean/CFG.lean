@@ -546,7 +546,7 @@ theorem derivation_step_to_terminal_string_is_leftmost_derivation_step
     simp only [is_derivation_step] at h1
     obtain ⟨R, ⟨sl_1, ⟨sl_2, ⟨h1_left, ⟨h1_right_left, h1_right_right⟩⟩⟩⟩⟩ := h1
 
-    rw [h1_right_right] at h2
+    rewrite [h1_right_right] at h2
     have s1 : ∀ (c : Symbol NTS TS), c ∈ sl_1 → c.isTS :=
     by
       intro c a1
